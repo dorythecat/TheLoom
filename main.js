@@ -54,7 +54,7 @@ function makeText(text, position, spinning = false) {
         textMesh.position.y = position.y;
         textMesh.position.z = position.z;
         scene.add(textMesh);
-    });
+    }, null, function (err) { console.error('An error occurred loading the font!'); });
 }
 
 makeText('Nexus Node', new THREE.Vector3(0, 1.5, 0), true); // Always add 1.5 to y so it hovers over nodes
