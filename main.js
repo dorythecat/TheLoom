@@ -17,9 +17,17 @@ document.body.appendChild(renderer.domElement);
 
 // Create a sphere
 const geometry = new THREE.SphereGeometry(1);
-const material = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
+scene.add(nexusNode);
+
+let nodes = [nexusNode];
+function addNode(position) {
+    const geometry = new THREE.SphereGeometry(0.2);
+    const node = new THREE.Mesh(geometry, nodeMaterial);
+    node.position.set(position.x, position.y, position.z);
+    scene.add(node);
+}
 
 const lineMaterial = new THREE.LineBasicMaterial({
     color: 0xaaaaaa
