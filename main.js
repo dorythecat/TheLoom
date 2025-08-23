@@ -32,8 +32,8 @@ scene.add(line);
 // Load a font and create the text mesh
 const loader = new FontLoader();
 let textMeshes = [];
-function makeText(text, position) {
-    let textMesh;
+let spinningText = [];
+function makeText(text, position, spinning = false) {
     loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', function (font) {
         const textGeometry = new TextGeometry(text, {
             font: font,
@@ -47,6 +47,7 @@ function makeText(text, position) {
         const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 
         textMeshes.push(textMesh);
+        if (spinning) spinningText.push(textMesh);
 
         // Position the text above the sphere
         textMesh.position.x = position.x;
@@ -56,7 +57,7 @@ function makeText(text, position) {
     });
 }
 
-makeText('Nexus Node', new THREE.Vector3(0, 1.5, 0)); // Always add 1.5 to y so it hovers over nodes
+makeText('Nexus Node', new THREE.Vector3(0, 1.5, 0), true); // Always add 1.5 to y so it hovers over nodes
 
 camera.position.z = 5;
 
@@ -80,7 +81,7 @@ function animate() {
     line.rotation.x = cube.rotation.x;
     line.rotation.y = cube.rotation.y;
 
-    for (let textMesh of textMeshes) textMesh.rotation.y += 0.01;
+    for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
 
     composer.render(1 / 60);
 }
