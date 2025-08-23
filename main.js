@@ -33,7 +33,7 @@ scene.add(line);
 const loader = new FontLoader();
 let textMesh;
 loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-    const textGeometry = new TextGeometry('Spinning Text', {
+    const textGeometry = new TextGeometry('Nexus Node', {
         font: font,
         size: 0.4,
         depth: 0.1,
