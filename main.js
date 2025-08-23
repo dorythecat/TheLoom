@@ -25,6 +25,17 @@ const lineMaterial = new THREE.LineBasicMaterial({
     color: 0xaaaaaa
 });
 
+let lines = [];
+function addLine(start, end) {
+    const points = [];
+    points.push(start);
+    points.push(end);
+    const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+    const line = new THREE.Line(lineGeometry, lineMaterial);
+    lines.push(line);
+    scene.add(line);
+}
+
 // Load a font and create the text mesh
 const loader = new FontLoader();
 let textMeshes = [];
