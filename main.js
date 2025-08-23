@@ -32,7 +32,7 @@ scene.add(line);
 // Load a font and create the text mesh
 const loader = new FontLoader();
 let textMeshes = [];
-function makeText(text, node_position) {
+function makeText(text, position) {
     let textMesh;
     loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', function (font) {
         const textGeometry = new TextGeometry(text, {
@@ -49,14 +49,14 @@ function makeText(text, node_position) {
         textMeshes.push(textMesh);
 
         // Position the text above the sphere
-        textMesh.position.x = node_position.x;
-        textMesh.position.y = node_position.y + 1.5; // Adjust height to be above the node
-        textMesh.position.z = node_position.z;
+        textMesh.position.x = position.x;
+        textMesh.position.y = position.y;
+        textMesh.position.z = position.z;
         scene.add(textMesh);
     });
 }
 
-makeText('Nexus Node', new THREE.Vector3(0, 0, 0));
+makeText('Nexus Node', new THREE.Vector3(0, 1.5, 0)); // Always add 1.5 to y so it hovers over nodes
 
 camera.position.z = 5;
 
