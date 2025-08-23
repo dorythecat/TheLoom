@@ -1,2 +1,2 @@
-# TheLoom
+# The Loom
 A game about weaving strange looms...
