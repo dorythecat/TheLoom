@@ -37,7 +37,7 @@ loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.t
         font: font,
         size: 0.4,
         depth: 0.1,
-        curveSegments: 12
+        curveSegments: 2
     });
     textGeometry.center();
 
