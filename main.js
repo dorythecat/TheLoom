@@ -41,7 +41,7 @@ loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.t
     });
     textGeometry.center();
 
-    const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+    const textMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
     textMesh = new THREE.Mesh(textGeometry, textMaterial);
 
     // Position the text above the sphere
@@ -71,7 +71,7 @@ function animate() {
     line.rotation.x = cube.rotation.x;
     line.rotation.y = cube.rotation.y;
 
-    if (textMesh) textMesh.rotation.y += 0.02;
+    if (textMesh) textMesh.rotation.y += 0.005;
 
     composer.render(1 / 60);
 }
