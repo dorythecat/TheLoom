@@ -48,11 +48,11 @@ function addLine(start, end) {
 const loader = new FontLoader();
 let textMeshes = [];
 let spinningText = [];
-function addText(text, position, spinning = false) {
+function addText(text, position, size = 0.4, spinning = false) {
     loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', function (font) {
         const textGeometry = new TextGeometry(text, {
             font: font,
-            size: 0.4,
+            size: size,
             depth: 0.1,
             curveSegments: 2
         });
@@ -72,7 +72,7 @@ function addText(text, position, spinning = false) {
     }, null, function (err) { console.error('An error occurred loading the font!'); });
 }
 
-addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), true); // Always add 1.5 to y so it hovers over nodes
+addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true); // Always add 1.5 to y so it hovers over nodes
 
 camera.position.z = 5;
 
@@ -86,6 +86,10 @@ const bloomPass = new UnrealBloomPass(
     0.3 // threshold
 );
 composer.addPass(bloomPass);
+
+addNode(new THREE.Vector3(3, 0, 0));
+addLine(nexusNode.position, new THREE.Vector3(3, 0, 0));
+addText('Child Node', new THREE.Vector3(3, 1, 0), 0.2);
 
 function animate() {
     for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
