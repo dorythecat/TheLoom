@@ -23,7 +23,7 @@ scene.add(nexusNode);
 
 let nodes = [nexusNode];
 function addNode(position) {
-    const geometry = new THREE.SphereGeometry(0.2);
+    const geometry = new THREE.SphereGeometry(0.5);
     const node = new THREE.Mesh(geometry, nodeMaterial);
     node.position.set(position.x, position.y, position.z);
     scene.add(node);
