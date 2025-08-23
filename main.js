@@ -16,7 +16,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Create a sphere
-const geometry = new THREE.SphereGeometry(1, 64, 32);
+const geometry = new THREE.SphereGeometry(1);
 const material = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
 const cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
