@@ -48,7 +48,7 @@ function addLine(start, end) {
 const loader = new FontLoader();
 let textMeshes = [];
 let spinningText = [];
-function makeText(text, position, spinning = false) {
+function addText(text, position, spinning = false) {
     loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', function (font) {
         const textGeometry = new TextGeometry(text, {
             font: font,
@@ -72,7 +72,7 @@ function makeText(text, position, spinning = false) {
     }, null, function (err) { console.error('An error occurred loading the font!'); });
 }
 
-makeText('Nexus Node', new THREE.Vector3(0, 1.5, 0), true); // Always add 1.5 to y so it hovers over nodes
+addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), true); // Always add 1.5 to y so it hovers over nodes
 
 camera.position.z = 5;
 
