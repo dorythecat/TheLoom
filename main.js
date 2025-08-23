@@ -31,23 +31,32 @@ scene.add(line);
 
 // Load a font and create the text mesh
 const loader = new FontLoader();
-let textMesh;
-loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-    const textGeometry = new TextGeometry('Nexus Node', {
-        font: font,
-        size: 0.4,
-        depth: 0.1,
-        curveSegments: 2
+let textMeshes = [];
+function makeText(text, node_position) {
+    let textMesh;
+    loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const textGeometry = new TextGeometry(text, {
+            font: font,
+            size: 0.4,
+            depth: 0.1,
+            curveSegments: 2
+        });
+        textGeometry.center();
+
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+        const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+        textMeshes.push(textMesh);
+
+        // Position the text above the sphere
+        textMesh.position.x = node_position.x;
+        textMesh.position.y = node_position.y + 1.5; // Adjust height to be above the node
+        textMesh.position.z = node_position.z;
+        scene.add(textMesh);
     });
-    textGeometry.center();
+}
 
-    const textMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
-    textMesh = new THREE.Mesh(textGeometry, textMaterial);
-
-    // Position the text above the sphere
-    textMesh.position.y = 1.5;
-    scene.add(textMesh);
-});
+makeText('Nexus Node', new THREE.Vector3(0, 0, 0));
 
 camera.position.z = 5;
 
@@ -71,7 +80,7 @@ function animate() {
     line.rotation.x = cube.rotation.x;
     line.rotation.y = cube.rotation.y;
 
-    if (textMesh) textMesh.rotation.y += 0.005;
+    for (let textMesh of textMeshes) textMesh.rotation.y += 0.01;
 
     composer.render(1 / 60);
 }
