@@ -110,7 +110,6 @@ let pulsing = false;
 let pulsingTime = 0;
 const pulsingDuration = 0.2; // seconds
 const pulsingStrength = 0.1;
-let pulsingOrigin = nexusNode.position.clone();
 
 renderer.domElement.addEventListener('click', () => {
     influence++;
