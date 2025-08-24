@@ -44,6 +44,10 @@ let textMeshes = [], spinningText = [];
 const loader = new FontLoader();
 loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json').then(data => {
     font = data;
+
+    // Add initial text above the nexus node
+    const text = addText('Nexus', new THREE.Vector3(0, 1.5, 0), 0.4, true);
+    nodes.push([nexusNode, text]);
 }).catch(err => {
     console.error('Error loading font:', err);
 });
@@ -68,6 +72,7 @@ function addText(text, position, size = 0.4, spinning = false) {
     textMesh.position.y = position.y;
     textMesh.position.z = position.z;
     scene.add(textMesh);
+    return textMesh;
 }
 
 // Create the base (nexus) node
@@ -76,17 +81,18 @@ const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
 const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
 scene.add(nexusNode);
 
-let nodes = [nexusNode];
+let nodes = [];
 let nodeConnections = {}; // Track connections between nodes
-function addNode(position, originNode) {
+function addNode(position, originNode, name) {
     const geometry = new THREE.SphereGeometry(0.5);
     const node = new THREE.Mesh(geometry, nodeMaterial);
     node.position.set(position.x, position.y, position.z);
-    nodes.push(node);
     scene.add(node);
     addLine(originNode.position, node.position);
+    const text = addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3);
     if (!nodeConnections[originNode.uuid]) nodeConnections[originNode.uuid] = [];
     nodeConnections[originNode.uuid].push(node);
+    nodes.push([node, text]);
 }
 
 camera.position.z = 5;
@@ -137,16 +143,16 @@ addButton.style.top = '50px';
 addButton.style.left = '10px';
 addButton.textContent = 'Add Node';
 document.body.appendChild(addButton);
+let nodeCount = 1;
 addButton.addEventListener('click', () => {
     const angle = Math.random() * Math.PI * 2;
     const radius = 3 + Math.random() * 2;
-    const originNode = nodes[Math.floor(Math.random() * nodes.length)];
+    const originNode = nodes[Math.floor(Math.random() * nodes.length)][0];
     const x = originNode.position.x + Math.cos(angle) * radius;
     const y = originNode.position.y + (Math.random() - 0.5)
     const z = originNode.position.z + Math.sin(angle) * radius;
     const position = new THREE.Vector3(x, y, z);
-    addNode(position, originNode);
-    addText('Node', new THREE.Vector3(x, y + 1.5, z), 0.3, true);
+    addNode(position, originNode, `Node ${nodeCount++}`);
 });
 
 function animate() {
@@ -170,17 +176,9 @@ function animate() {
     for (let line of lines) scene.remove(line);
     lines = [];
 
-    // Clear text meshes (they will be re-added if needed)
-    for (let textMesh of textMeshes) scene.remove(textMesh);
-    textMeshes = [];
-    spinningText = [];
-
-    // Re-add nexus text
-    addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true);
-
     // Adjust positions so nodes are properly spaced
-    for (const node of nodes) {
-        for (const otherNode of nodes) {
+    for (const [node, text] of nodes) {
+        for (const [otherNode, _] of nodes) {
             if (node === otherNode) continue;
             const distance = node.position.distanceTo(otherNode.position);
             const connected = nodeConnections[node.uuid] && nodeConnections[node.uuid].includes(otherNode);
@@ -196,8 +194,11 @@ function animate() {
                 otherNode.position.addScaledVector(direction, -moveDistance);
             } if (connected) addLine(node.position, otherNode.position);
         }
-        if (node === nexusNode) continue; // Nexus text already added
-        addText('Node', new THREE.Vector3(node.position.x, node.position.y + 1.5, node.position.z), 0.3);
+        if (text) {
+            text.position.x = node.position.x;
+            text.position.y = node.position.y + (node === nexusNode ? 1.5 : 1);
+            text.position.z = node.position.z;
+        }
     }
 
     controls.update(deltaTime);
