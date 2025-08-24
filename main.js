@@ -43,8 +43,6 @@ let font;
 const loader = new FontLoader();
 loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json').then(data => {
     font = data;
-    // Add the nexus node text here or it won't appear properly
-    addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true);
 }).catch(err => {
     console.error('Error loading font:', err);
 });
@@ -167,11 +165,17 @@ function animate() {
     }
 
     // Make sure nodes are properly spaced and beautiful :3
-    // TODO: Fix text
     // TODO(maybge?): Optimize so not n^2
     // Clear previous lines
     for (let line of lines) scene.remove(line);
     lines = [];
+
+    // Clear text meshes (they will be re-added if needed)
+    for (let textMesh of textMeshes) scene.remove(textMesh);
+    textMeshes = [];
+    spinningText = [];
+    // Re-add nexus text
+    addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true);
 
     // Adjust positions
     for (const node of nodes) {
@@ -191,6 +195,8 @@ function animate() {
                 otherNode.position.addScaledVector(direction, -moveDistance);
             } if (connected) addLine(node.position, otherNode.position);
         }
+        if (node === nexusNode) continue; // Nexus text already added
+        addText('Node', new THREE.Vector3(node.position.x, node.position.y + 1.5, node.position.z), 0.3, true);
     }
 
     controls.update(deltaTime);
