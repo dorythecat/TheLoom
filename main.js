@@ -164,6 +164,8 @@ function animate() {
     // Clear previous lines
     for (let line of lines) scene.remove(line);
     lines = [];
+
+    // Adjust positions
     for (const node of nodes) {
         for (const otherNode of nodes) {
             if (node === otherNode) continue;
