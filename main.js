@@ -154,10 +154,12 @@ addButton.addEventListener('click', () => {
 });
 
 function animate() {
+    const deltaTime = 1 / 60;
+
     for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
 
     if (pulsing) {
-        pulsingTime += 1 / 60;
+        pulsingTime += deltaTime;
         if (pulsingTime < pulsingDuration) {
             const scale = 1 + Math.sin(2 * Math.PI * pulsingTime / pulsingDuration) * pulsingStrength;
             nexusNode.scale.set(scale, scale, scale);
@@ -191,8 +193,8 @@ function animate() {
         }
     }
 
-    controls.update(1 / 60);
+    controls.update(deltaTime);
 
-    composer.render(1 / 60);
+    composer.render(deltaTime);
 }
 renderer.setAnimationLoop(animate);
