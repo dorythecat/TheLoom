@@ -37,17 +37,14 @@ function addNode(position) {
     scene.add(node);
 }
 
-const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0xaaaaaa
-});
+const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
 
 let lines = [];
 function addLine(start, end) {
     const points = [];
     points.push(start);
     points.push(end);
-    const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
-    const line = new THREE.Line(lineGeometry, lineMaterial);
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), lineMaterial);
     lines.push(line);
     scene.add(line);
 }
@@ -57,7 +54,7 @@ const loader = new FontLoader();
 let textMeshes = [];
 let spinningText = [];
 function addText(text, position, size = 0.4, spinning = false) {
-    loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+    loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', (font) => {
         const textGeometry = new TextGeometry(text, {
             font: font,
             size: size,
@@ -77,7 +74,7 @@ function addText(text, position, size = 0.4, spinning = false) {
         textMesh.position.y = position.y;
         textMesh.position.z = position.z;
         scene.add(textMesh);
-    }, null, function (err) { console.error('An error occurred loading the font!'); });
+    }, null, (err) => { console.error(`An error occurred loading the font: ${err}`); });
 }
 
 addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true); // Always add 1.5 to y so it hovers over nodes
