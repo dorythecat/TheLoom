@@ -26,21 +26,6 @@ controls.rollSpeed = Math.PI / 4;
 controls.autoForward = false;
 controls.dragToLook = true;
 
-// Create a sphere
-const geometry = new THREE.SphereGeometry(1);
-const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
-const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
-scene.add(nexusNode);
-
-let nodes = [nexusNode];
-function addNode(position) {
-    const geometry = new THREE.SphereGeometry(0.5);
-    const node = new THREE.Mesh(geometry, nodeMaterial);
-    node.position.set(position.x, position.y, position.z);
-    nodes.push(node);
-    scene.add(node);
-}
-
 const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
 
 let lines = [];
@@ -79,6 +64,21 @@ function addText(text, position, size = 0.4, spinning = false) {
         textMesh.position.z = position.z;
         scene.add(textMesh);
     }, null, (err) => { console.error(`An error occurred loading the font: ${err}`); });
+}
+
+// Create the base (nexus) node
+const geometry = new THREE.SphereGeometry(1);
+const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
+scene.add(nexusNode);
+
+let nodes = [nexusNode];
+function addNode(position) {
+    const geometry = new THREE.SphereGeometry(0.5);
+    const node = new THREE.Mesh(geometry, nodeMaterial);
+    node.position.set(position.x, position.y, position.z);
+    nodes.push(node);
+    scene.add(node);
 }
 
 addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true); // Always add 1.5 to y so it hovers over nodes
