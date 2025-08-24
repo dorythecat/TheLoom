@@ -40,14 +40,13 @@ function addLine(start, end) {
 
 // Load a font and create the text mesh
 let font;
+let textMeshes = [], spinningText = [];
 const loader = new FontLoader();
 loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json').then(data => {
     font = data;
 }).catch(err => {
     console.error('Error loading font:', err);
 });
-let textMeshes = [];
-let spinningText = [];
 function addText(text, position, size = 0.4, spinning = false) {
     if (!font) return; // Font not loaded yet
     console.log(`Adding text: ${text} at position ${position.toArray()}`);
@@ -199,11 +198,10 @@ function animate() {
             } if (connected) addLine(node.position, otherNode.position);
         }
         if (node === nexusNode) continue; // Nexus text already added
-        addText('Node', new THREE.Vector3(node.position.x, node.position.y + 1.5, node.position.z), 0.3, true);
+        addText('Node', new THREE.Vector3(node.position.x, node.position.y + 1.5, node.position.z), 0.3);
     }
 
     controls.update(deltaTime);
-
     composer.render(deltaTime);
 }
 renderer.setAnimationLoop(animate);
