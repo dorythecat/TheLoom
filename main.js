@@ -4,6 +4,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import { FlyControls } from 'three/examples/jsm/controls/FlyControls'
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -14,6 +15,13 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+// Initiate FlyControls with various params
+const controls = new FlyControls(camera, renderer.domElement);
+controls.movementSpeed = 10;
+controls.rollSpeed = Math.PI / 4;
+controls.autoForward = false;
+controls.dragToLook = true;
 
 // Create a sphere
 const geometry = new THREE.SphereGeometry(1);
@@ -93,6 +101,8 @@ addText('Child Node', new THREE.Vector3(3, 1, 0), 0.2);
 
 function animate() {
     for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
+
+    controls.update(1 / 60);
 
     composer.render(1 / 60);
 }
