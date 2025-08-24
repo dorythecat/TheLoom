@@ -39,31 +39,39 @@ function addLine(start, end) {
 }
 
 // Load a font and create the text mesh
+let font;
 const loader = new FontLoader();
+loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json').then(data => {
+    font = data;
+    // Add the nexus node text here or it won't appear properly
+    addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true);
+}).catch(err => {
+    console.error('Error loading font:', err);
+});
 let textMeshes = [];
 let spinningText = [];
 function addText(text, position, size = 0.4, spinning = false) {
-    loader.load('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json', (font) => {
-        const textGeometry = new TextGeometry(text, {
-            font: font,
-            size: size,
-            depth: 0.1,
-            curveSegments: 2
-        });
-        textGeometry.center();
+    if (!font) return; // Font not loaded yet
+    console.log(`Adding text: ${text} at position ${position.toArray()}`);
+    const textGeometry = new TextGeometry(text, {
+        font: font,
+        size: size,
+        depth: 0.1,
+        curveSegments: 2
+    });
+    textGeometry.center();
 
-        const textMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
-        const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    const textMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 
-        textMeshes.push(textMesh);
-        if (spinning) spinningText.push(textMesh);
+    textMeshes.push(textMesh);
+    if (spinning) spinningText.push(textMesh);
 
-        // Position the text above the sphere
-        textMesh.position.x = position.x;
-        textMesh.position.y = position.y;
-        textMesh.position.z = position.z;
-        scene.add(textMesh);
-    }, null, (err) => { console.error(`An error occurred loading the font: ${err}`); });
+    // Position the text above the sphere
+    textMesh.position.x = position.x;
+    textMesh.position.y = position.y;
+    textMesh.position.z = position.z;
+    scene.add(textMesh);
 }
 
 // Create the base (nexus) node
@@ -84,8 +92,6 @@ function addNode(position, originNode) {
     if (!nodeConnections[originNode.uuid]) nodeConnections[originNode.uuid] = [];
     nodeConnections[originNode.uuid].push(node);
 }
-
-addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true); // Always add 1.5 to y so it hovers over nodes
 
 camera.position.z = 5;
 
