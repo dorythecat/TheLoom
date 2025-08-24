@@ -9,6 +9,8 @@ import { FlyControls } from 'three/examples/jsm/controls/FlyControls'
 const MIN_NODE_DISTANCE = 3;
 const MAX_NODE_DISTANCE = 5;
 
+let nodes = [];
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
@@ -36,6 +38,7 @@ function addLine(start, end) {
     const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), lineMaterial);
     lines.push(line);
     scene.add(line);
+    return line;
 }
 
 // Load a font and create the text mesh
@@ -47,7 +50,7 @@ loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regu
 
     // Add initial text above the nexus node
     const text = addText('Nexus', new THREE.Vector3(0, 1.5, 0), 0.4, true);
-    nodes.push([nexusNode, text]);
+    nodes.push([nexusNode, text, null]);
 }).catch(err => {
     console.error('Error loading font:', err);
 });
@@ -81,18 +84,17 @@ const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
 const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
 scene.add(nexusNode);
 
-let nodes = [];
 let nodeConnections = {}; // Track connections between nodes
 function addNode(position, originNode, name) {
     const geometry = new THREE.SphereGeometry(0.5);
     const node = new THREE.Mesh(geometry, nodeMaterial);
     node.position.set(position.x, position.y, position.z);
     scene.add(node);
-    addLine(originNode.position, node.position);
     const text = addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3);
+    const line = addLine(originNode.position, node.position);
     if (!nodeConnections[originNode.uuid]) nodeConnections[originNode.uuid] = [];
     nodeConnections[originNode.uuid].push(node);
-    nodes.push([node, text]);
+    nodes.push([node, text, line]);
 }
 
 camera.position.z = 5;
@@ -170,18 +172,14 @@ function animate() {
         } else pulsing = false;
     }
 
-    // Clear previous lines
-    for (let line of lines) scene.remove(line);
-    lines = [];
-
     // Adjust positions so nodes are properly spaced
     for (let i = 0; i < nodes.length; i++) {
-        const [node, text] = nodes[i];
+        const [node, text, line] = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
-            const otherNode = nodes[j][0];
+            const [otherNode, _, otherLine] = nodes[j];
             if (node === otherNode) continue;
             const distance = node.position.distanceTo(otherNode.position);
-            const connected = nodeConnections[node.uuid] && nodeConnections[node.uuid].includes(otherNode);
+            const connected = nodeConnections[node.uuid]?.includes(otherNode);
             if (distance < MIN_NODE_DISTANCE) { // Push apart
                 const direction = new THREE.Vector3().subVectors(node.position, otherNode.position).normalize();
                 const moveDistance = (MIN_NODE_DISTANCE - distance) / 2;
@@ -192,7 +190,13 @@ function animate() {
                 const moveDistance = (distance - MAX_NODE_DISTANCE) / 2;
                 node.position.addScaledVector(direction, moveDistance);
                 otherNode.position.addScaledVector(direction, -moveDistance);
-            } if (connected) addLine(node.position, otherNode.position);
+            } if (connected) {
+                scene.remove(otherLine);
+                lines = lines.filter(l => l !== otherLine);
+                let newLine = addLine(node.position, otherNode.position);
+                nodes[j][2] = newLine; // Update line reference
+                lines.push(newLine);
+            }
         }
 
         // Move text to follow node
