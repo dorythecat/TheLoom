@@ -174,7 +174,7 @@ function animate() {
 
     // Adjust positions so nodes are properly spaced
     for (let i = 0; i < nodes.length; i++) {
-        const [node, text, line] = nodes[i];
+        const [node, text, _] = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
             const [otherNode, _, otherLine] = nodes[j];
             if (node === otherNode) continue;
@@ -190,13 +190,19 @@ function animate() {
                 const moveDistance = (distance - MAX_NODE_DISTANCE) / 2;
                 node.position.addScaledVector(direction, moveDistance);
                 otherNode.position.addScaledVector(direction, -moveDistance);
-            } if (connected) {
-                scene.remove(otherLine);
-                lines = lines.filter(l => l !== otherLine);
-                let newLine = addLine(node.position, otherNode.position);
-                nodes[j][2] = newLine; // Update line reference
-                lines.push(newLine);
             }
+
+            // Update line if connected
+            if (!connected) continue;
+
+            // Remove old line
+            scene.remove(otherLine);
+            lines = lines.filter(l => l !== otherLine);
+
+            // Add new line
+            const newLine = addLine(node.position, otherNode.position);
+            nodes[j][2] = newLine;
+            lines.push(newLine);
         }
 
         // Move text to follow node
