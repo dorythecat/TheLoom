@@ -7,7 +7,7 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FlyControls } from 'three/examples/jsm/controls/FlyControls'
 
 const MIN_NODE_DISTANCE = 3;
-const MAX_NODE_DISTANCE = 10;
+const MAX_NODE_DISTANCE = 5;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -73,12 +73,16 @@ const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
 scene.add(nexusNode);
 
 let nodes = [nexusNode];
-function addNode(position) {
+let nodeConnections = {}; // Track connections between nodes
+function addNode(position, originNode) {
     const geometry = new THREE.SphereGeometry(0.5);
     const node = new THREE.Mesh(geometry, nodeMaterial);
     node.position.set(position.x, position.y, position.z);
     nodes.push(node);
     scene.add(node);
+    addLine(originNode.position, node.position);
+    if (!nodeConnections[originNode.uuid]) nodeConnections[originNode.uuid] = [];
+    nodeConnections[originNode.uuid].push(node);
 }
 
 addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true); // Always add 1.5 to y so it hovers over nodes
@@ -139,8 +143,7 @@ addButton.addEventListener('click', () => {
     const y = originNode.position.y + (Math.random() - 0.5)
     const z = originNode.position.z + Math.sin(angle) * radius;
     const position = new THREE.Vector3(x, y, z);
-    addNode(position);
-    addLine(originNode.position, position);
+    addNode(position, originNode);
     addText('Node', new THREE.Vector3(x, y + 1.5, z), 0.3, true);
 });
 
@@ -157,7 +160,6 @@ function animate() {
 
     // Make sure nodes are properly spaced and beautiful :3
     // TODO: Fix text
-    // TODO: Add list of connected nodes to each node and only draw lines between those, and only make pull affect those
     // TODO(maybge?): Optimize so not n^2
     // Clear previous lines
     for (let line of lines) {
@@ -167,18 +169,19 @@ function animate() {
         for (const otherNode of nodes) {
             if (node === otherNode) continue;
             const distance = node.position.distanceTo(otherNode.position);
+            const connected = nodeConnections[node.uuid] && nodeConnections[node.uuid].includes(otherNode);
             if (distance < MIN_NODE_DISTANCE) {
                 const direction = new THREE.Vector3().subVectors(node.position, otherNode.position).normalize();
                 const moveDistance = (MIN_NODE_DISTANCE - distance) / 2;
                 node.position.addScaledVector(direction, moveDistance);
                 otherNode.position.addScaledVector(direction, -moveDistance);
-            } else if (distance > MAX_NODE_DISTANCE) {
+            } else if (distance > MAX_NODE_DISTANCE && connected) { // Only pull on connected nodes
                 const direction = new THREE.Vector3().subVectors(otherNode.position, node.position).normalize();
                 const moveDistance = (distance - MAX_NODE_DISTANCE) / 2;
                 node.position.addScaledVector(direction, moveDistance);
                 otherNode.position.addScaledVector(direction, -moveDistance);
             } // Else, within acceptable range, do nothing
-            addLine(node.position, otherNode.position);
+            if (connected) addLine(node.position, otherNode.position);
         }
     }
 
