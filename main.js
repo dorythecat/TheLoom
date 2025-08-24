@@ -105,13 +105,33 @@ influenceDiv.style.fontFamily = 'sans-serif';
 influenceDiv.textContent = `Influence: ${influence}`;
 document.body.appendChild(influenceDiv);
 
+// Nexus node pulsing effect
+let pulsing = false;
+let pulsingTime = 0;
+const pulsingDuration = 0.2; // seconds
+const pulsingStrength = 0.1;
+let pulsingOrigin = nexusNode.position.clone();
+
 renderer.domElement.addEventListener('click', () => {
     influence++;
     influenceDiv.textContent = `Influence: ${influence}`;
+
+    // Start pulsing effect
+    pulsing = true;
+    pulsingTime = 0;
+    pulsingOrigin = nexusNode.position.clone();
 });
 
 function animate() {
     for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
+
+    if (pulsing) {
+        pulsingTime += 1 / 60;
+        if (pulsingTime < pulsingDuration) {
+            const scale = 1 + Math.sin((pulsingTime / pulsingDuration) * Math.PI * 2) * pulsingStrength;
+            nexusNode.scale.set(scale, scale, scale);
+        } else pulsing = false;
+    }
 
     controls.update(1 / 60);
 
