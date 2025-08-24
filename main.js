@@ -49,7 +49,6 @@ loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regu
 });
 function addText(text, position, size = 0.4, spinning = false) {
     if (!font) return; // Font not loaded yet
-    console.log(`Adding text: ${text} at position ${position.toArray()}`);
     const textGeometry = new TextGeometry(text, {
         font: font,
         size: size,
