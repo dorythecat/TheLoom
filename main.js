@@ -147,13 +147,13 @@ addButton.textContent = 'Add Node';
 document.body.appendChild(addButton);
 let nodeCount = 1;
 addButton.addEventListener('click', () => {
-    const angle = Math.random() * Math.PI * 2;
-    const radius = 3 + Math.random() * 2;
+    const angle = 2 * Math.PI * Math.random();
+    const radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
     const originNode = nodes[Math.floor(Math.random() * nodes.length)][0];
-    const x = originNode.position.x + Math.cos(angle) * radius;
-    const y = originNode.position.y + (Math.random() - 0.5)
-    const z = originNode.position.z + Math.sin(angle) * radius;
-    const position = new THREE.Vector3(x, y, z);
+    const x = Math.cos(angle) * radius;
+    const y = Math.random() - 1; // Slight vertical variation
+    const z = Math.sin(angle) * radius;
+    const position = origin.position + new THREE.Vector3(x, y, z);
     addNode(position, originNode, `Node ${nodeCount++}`);
 });
 
