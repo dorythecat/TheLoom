@@ -154,8 +154,10 @@ addButton.addEventListener('click', () => {
 function animate() {
     const deltaTime = 1 / 60;
 
+    // Rotate spinning text
     for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
 
+    // Handle pulsing effect
     if (pulsing) {
         pulsingTime += deltaTime;
         if (pulsingTime < pulsingDuration) {
@@ -164,8 +166,8 @@ function animate() {
         } else pulsing = false;
     }
 
-    // Make sure nodes are properly spaced and beautiful :3
     // TODO(maybge?): Optimize so not n^2
+
     // Clear previous lines
     for (let line of lines) scene.remove(line);
     lines = [];
@@ -174,10 +176,11 @@ function animate() {
     for (let textMesh of textMeshes) scene.remove(textMesh);
     textMeshes = [];
     spinningText = [];
+
     // Re-add nexus text
     addText('Nexus Node', new THREE.Vector3(0, 1.5, 0), 0.4, true);
 
-    // Adjust positions
+    // Adjust positions so nodes are properly spaced
     for (const node of nodes) {
         for (const otherNode of nodes) {
             if (node === otherNode) continue;
