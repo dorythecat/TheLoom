@@ -92,10 +92,6 @@ const bloomPass = new UnrealBloomPass(
 );
 composer.addPass(bloomPass);
 
-addNode(new THREE.Vector3(3, 0, 0));
-addLine(nexusNode.position, new THREE.Vector3(3, 0, 0));
-addText('Child Node', new THREE.Vector3(3, 1, 0), 0.2);
-
 function animate() {
     for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
 
