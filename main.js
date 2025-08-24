@@ -170,7 +170,7 @@ function animate() {
         } else pulsing = false;
     }
 
-    // TODO(maybge?): Optimize so not n^2
+    // TODO(maybe?): Optimize so not n^2
 
     // Clear previous lines
     for (let line of lines) scene.remove(line);
@@ -194,11 +194,11 @@ function animate() {
                 otherNode.position.addScaledVector(direction, -moveDistance);
             } if (connected) addLine(node.position, otherNode.position);
         }
-        if (text) {
-            text.position.x = node.position.x;
-            text.position.y = node.position.y + (node === nexusNode ? 1.5 : 1);
-            text.position.z = node.position.z;
-        }
+
+        // Move text to follow node
+        text.position.x = node.position.x;
+        text.position.y = node.position.y + (node === nexusNode ? 1.5 : 1);
+        text.position.z = node.position.z;
     }
 
     controls.update(deltaTime);
