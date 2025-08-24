@@ -162,26 +162,24 @@ function animate() {
     // TODO: Fix text
     // TODO(maybge?): Optimize so not n^2
     // Clear previous lines
-    for (let line of lines) {
-        scene.remove(line);
-    } lines = [];
+    for (let line of lines) scene.remove(line);
+    lines = [];
     for (const node of nodes) {
         for (const otherNode of nodes) {
             if (node === otherNode) continue;
             const distance = node.position.distanceTo(otherNode.position);
             const connected = nodeConnections[node.uuid] && nodeConnections[node.uuid].includes(otherNode);
-            if (distance < MIN_NODE_DISTANCE) {
+            if (distance < MIN_NODE_DISTANCE) { // Push apart
                 const direction = new THREE.Vector3().subVectors(node.position, otherNode.position).normalize();
                 const moveDistance = (MIN_NODE_DISTANCE - distance) / 2;
                 node.position.addScaledVector(direction, moveDistance);
                 otherNode.position.addScaledVector(direction, -moveDistance);
-            } else if (distance > MAX_NODE_DISTANCE && connected) { // Only pull on connected nodes
+            } else if (distance > MAX_NODE_DISTANCE && connected) { // Only pull together connected nodes
                 const direction = new THREE.Vector3().subVectors(otherNode.position, node.position).normalize();
                 const moveDistance = (distance - MAX_NODE_DISTANCE) / 2;
                 node.position.addScaledVector(direction, moveDistance);
                 otherNode.position.addScaledVector(direction, -moveDistance);
-            } // Else, within acceptable range, do nothing
-            if (connected) addLine(node.position, otherNode.position);
+            } if (connected) addLine(node.position, otherNode.position);
         }
     }
 
