@@ -92,6 +92,24 @@ const bloomPass = new UnrealBloomPass(
 );
 composer.addPass(bloomPass);
 
+let influence = 0;
+
+// Optionally, create a simple score display
+const influenceDiv = document.createElement('div');
+influenceDiv.style.position = 'absolute';
+influenceDiv.style.top = '10px';
+influenceDiv.style.left = '10px';
+influenceDiv.style.color = '#fff';
+influenceDiv.style.fontSize = '24px';
+influenceDiv.style.fontFamily = 'sans-serif';
+influenceDiv.textContent = `Influence: ${influence}`;
+document.body.appendChild(influenceDiv);
+
+renderer.domElement.addEventListener('click', () => {
+    influence++;
+    influenceDiv.textContent = `Influence: ${influence}`;
+});
+
 function animate() {
     for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
 
