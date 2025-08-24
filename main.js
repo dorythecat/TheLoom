@@ -121,6 +121,26 @@ renderer.domElement.addEventListener('click', () => {
     pulsingTime = 0;
 });
 
+// Button to add nodes and lines for testing
+const addButton = document.createElement('button');
+addButton.style.position = 'absolute';
+addButton.style.top = '50px';
+addButton.style.left = '10px';
+addButton.textContent = 'Add Node';
+document.body.appendChild(addButton);
+addButton.addEventListener('click', () => {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 3 + Math.random() * 2;
+    const originNode = nodes[Math.floor(Math.random() * nodes.length)];
+    const x = originNode.position.x + Math.cos(angle) * radius;
+    const y = originNode.position.y + (Math.random() - 0.5)
+    const z = originNode.position.z + Math.sin(angle) * radius;
+    const position = new THREE.Vector3(x, y, z);
+    addNode(position);
+    addLine(originNode.position, position);
+    addText('Node', new THREE.Vector3(x, y + 1.5, z), 0.3, true);
+});
+
 function animate() {
     for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
 
