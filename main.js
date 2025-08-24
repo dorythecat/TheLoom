@@ -192,26 +192,19 @@ function animate() {
                 otherNode.position.addScaledVector(direction, -moveDistance);
             }
 
-            // Update line if connected
-            if (!connected) continue;
-
-            // Remove old line
-            scene.remove(otherLine);
-            lines = lines.filter(l => l !== otherLine);
-
-            // Add new line
-            const newLine = addLine(node.position, otherNode.position);
-            nodes[j][2] = newLine;
-            lines.push(newLine);
+            if (!connected) continue; // Check if nodes are connected before updating lines
+            scene.remove(otherLine); // Remove old line
+            lines[lines.indexOf(otherLine)] = nodes[j][2] = addLine(node.position, otherNode.position); // Add new line
         }
 
         // Move text to follow node
+        // The other nodes are automatically handled once we get
+        // to them so there's no worries about them
         text.position.x = node.position.x;
-        text.position.y = node.position.y + (node === nexusNode ? 1.5 : 1);
+        text.position.y = node.position.y + (node === nexusNode ? 1.5 : 1); // The nexus node is slightly bigger
         text.position.z = node.position.z;
     }
 
     controls.update(deltaTime);
     composer.render(deltaTime);
-}
-renderer.setAnimationLoop(animate);
+} renderer.setAnimationLoop(animate);
