@@ -119,7 +119,6 @@ renderer.domElement.addEventListener('click', () => {
     // Start pulsing effect
     pulsing = true;
     pulsingTime = 0;
-    pulsingOrigin = nexusNode.position.clone();
 });
 
 function animate() {
@@ -128,7 +127,7 @@ function animate() {
     if (pulsing) {
         pulsingTime += 1 / 60;
         if (pulsingTime < pulsingDuration) {
-            const scale = 1 + Math.sin((pulsingTime / pulsingDuration) * Math.PI * 2) * pulsingStrength;
+            const scale = 1 + Math.sin(2 * Math.PI * pulsingTime / pulsingDuration) * pulsingStrength;
             nexusNode.scale.set(scale, scale, scale);
         } else pulsing = false;
     }
