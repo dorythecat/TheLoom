@@ -170,15 +170,15 @@ function animate() {
         } else pulsing = false;
     }
 
-    // TODO(maybe?): Optimize so not n^2
-
     // Clear previous lines
     for (let line of lines) scene.remove(line);
     lines = [];
 
     // Adjust positions so nodes are properly spaced
-    for (const [node, text] of nodes) {
-        for (const [otherNode, _] of nodes) {
+    for (let i = 0; i < nodes.length; i++) {
+        const [node, text] = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+            const otherNode = nodes[j][0];
             if (node === otherNode) continue;
             const distance = node.position.distanceTo(otherNode.position);
             const connected = nodeConnections[node.uuid] && nodeConnections[node.uuid].includes(otherNode);
