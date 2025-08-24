@@ -6,6 +6,9 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FlyControls } from 'three/examples/jsm/controls/FlyControls'
 
+const MIN_NODE_DISTANCE = 3;
+const MAX_NODE_DISTANCE = 10;
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
@@ -150,6 +153,33 @@ function animate() {
             const scale = 1 + Math.sin(2 * Math.PI * pulsingTime / pulsingDuration) * pulsingStrength;
             nexusNode.scale.set(scale, scale, scale);
         } else pulsing = false;
+    }
+
+    // Make sure nodes are properly spaced and beautiful :3
+    // TODO: Fix text
+    // TODO: Add list of connected nodes to each node and only draw lines between those, and only make pull affect those
+    // TODO(maybge?): Optimize so not n^2
+    // Clear previous lines
+    for (let line of lines) {
+        scene.remove(line);
+    } lines = [];
+    for (const node of nodes) {
+        for (const otherNode of nodes) {
+            if (node === otherNode) continue;
+            const distance = node.position.distanceTo(otherNode.position);
+            if (distance < MIN_NODE_DISTANCE) {
+                const direction = new THREE.Vector3().subVectors(node.position, otherNode.position).normalize();
+                const moveDistance = (MIN_NODE_DISTANCE - distance) / 2;
+                node.position.addScaledVector(direction, moveDistance);
+                otherNode.position.addScaledVector(direction, -moveDistance);
+            } else if (distance > MAX_NODE_DISTANCE) {
+                const direction = new THREE.Vector3().subVectors(otherNode.position, node.position).normalize();
+                const moveDistance = (distance - MAX_NODE_DISTANCE) / 2;
+                node.position.addScaledVector(direction, moveDistance);
+                otherNode.position.addScaledVector(direction, -moveDistance);
+            } // Else, within acceptable range, do nothing
+            addLine(node.position, otherNode.position);
+        }
     }
 
     controls.update(1 / 60);
