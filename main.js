@@ -133,7 +133,7 @@ const pulsingDuration = 0.2; // seconds
 const pulsingStrength = 0.1;
 
 renderer.domElement.addEventListener('click', () => {
-    influence++;
+    influence += nodes.length;
     influenceDiv.textContent = `Influence: ${influence}`;
 
     // Start pulsing effect
