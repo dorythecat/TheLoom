@@ -28,19 +28,6 @@ controls.rollSpeed = Math.PI / 4;
 controls.autoForward = false;
 controls.dragToLook = true;
 
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
-
-let lines = [];
-function addLine(start, end) {
-    const points = [];
-    points.push(start);
-    points.push(end);
-    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), lineMaterial);
-    lines.push(line);
-    scene.add(line);
-    return line;
-}
-
 // Load a font and create the text mesh
 let font;
 let textMeshes = [], spinningText = [];
@@ -76,6 +63,19 @@ function addText(text, position, size = 0.4, spinning = false) {
     textMesh.position.z = position.z;
     scene.add(textMesh);
     return textMesh;
+}
+
+const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
+
+let lines = [];
+function addLine(start, end, text = "Line") {
+    const points = [];
+    points.push(start);
+    points.push(end);
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), lineMaterial);
+    lines.push(line);
+    scene.add(line);
+    return line;
 }
 
 // Create the base (nexus) node
