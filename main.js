@@ -148,13 +148,17 @@ let pulsingTime = 0;
 const pulsingDuration = 0.2; // seconds
 const pulsingStrength = 0.1;
 
-renderer.domElement.addEventListener('click', () => {
+function genInfluence() {
     influence += nodes.length;
     influenceDiv.textContent = `Influence: ${influence}`;
 
     // Start pulsing effect
     pulsing = true;
     pulsingTime = 0;
+}
+
+renderer.domElement.addEventListener('click', () => {
+    genInfluence();
 });
 
 // Button to add nodes and lines for testing
