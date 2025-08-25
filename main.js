@@ -37,7 +37,7 @@ loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regu
 
     // Add initial text above the nexus node
     const text = addText('Nexus', new THREE.Vector3(0, 1.5, 0), 0.4, true);
-    nodes.push([nexusNode, text, null]);
+    nodes.push([nexusNode, text]);
 }).catch(err => {
     console.error('Error loading font:', err);
 });
@@ -85,12 +85,18 @@ const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
 scene.add(nexusNode);
 
 let nodeConnections = {}; // Track connections between nodes
+let lineTexts = {}; // Track line texts
 
-function connectNodes(nodeA, nodeB) {
+function connectNodes(nodeA, nodeB, text = "Line") {
     if (!nodeConnections[nodeA.uuid]) nodeConnections[nodeA.uuid] = new Set();
     if (!nodeConnections[nodeB.uuid]) nodeConnections[nodeB.uuid] = new Set();
     nodeConnections[nodeA.uuid].add(nodeB.uuid);
     nodeConnections[nodeB.uuid].add(nodeA.uuid);
+
+    const key = [nodeA.uuid, nodeB.uuid].sort().join('-');
+    const mid = new THREE.Vector3().addVectors(nodeA.position, nodeB.position).multiplyScalar(0.5);
+    lineTexts[key] = addText(text, new THREE.Vector3(mid.x, mid.y + 0.5, mid.z), 0.2);
+
     return addLine(nodeA.position, nodeB.position);
 }
 
@@ -100,16 +106,8 @@ function addNode(position, originNode, name, lineText = "Line") {
     node.position.copy(position);
     scene.add(node);
 
-    nodes.push([
-        node,
-        addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3),
-        connectNodes(originNode, node),
-        addText(lineText, new THREE.Vector3(
-            (originNode.position.x + node.position.x) / 2,
-            (originNode.position.y + node.position.y) / 2 + 0.5,
-            (originNode.position.z + node.position.z) / 2
-        ), 0.2)
-    ]);
+    connectNodes(originNode, node);
+    nodes.push([node, addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3)]);
 }
 
 function createLoop(nodeIndexA, nodeIndexB) {
@@ -216,6 +214,24 @@ function updateLines() {
     }
 }
 
+function updateLineTexts() {
+    for (const key in lineTexts) {
+        const [uuidA, uuidB] = key.split('-');
+        let nodeA, nodeB;
+        for (let [node, _] of nodes) {
+            if (node.uuid === uuidA) nodeA = node;
+            else if (node.uuid === uuidB) nodeB = node;
+            if (nodeA && nodeB) break;
+        }
+        if (!nodeA || !nodeB) continue;
+        const textMesh = lineTexts[key];
+        textMesh.position.x = (nodeA.position.x + nodeB.position.x) / 2;
+        textMesh.position.y = (nodeA.position.y + nodeB.position.y) / 2 + 0.5;
+        textMesh.position.z = (nodeA.position.z + nodeB.position.z) / 2;
+        textMesh.lookAt(camera.position);
+    }
+}
+
 function animate() {
     const deltaTime = 1 / 60;
 
@@ -233,9 +249,9 @@ function animate() {
 
     // Adjust positions so nodes are properly spaced
     for (let i = 0; i < nodes.length; i++) {
-        const [node, text, _, __] = nodes[i];
+        const [node, text] = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
-            const [otherNode, _, otherLine, otherLineText] = nodes[j];
+            const [otherNode, _] = nodes[j];
             if (node === otherNode) continue;
             const distance = node.position.distanceTo(otherNode.position);
             const connected = nodeConnections[node.uuid]?.has(otherNode.uuid);
@@ -253,14 +269,6 @@ function animate() {
 
             if (!connected) continue; // Check if nodes are connected before updating lines
             updateLines();
-
-            // Move line text to midpoint of line
-            otherLineText.position.x = (node.position.x + otherNode.position.x) / 2;
-            otherLineText.position.y = (node.position.y + otherNode.position.y) / 2 + 0.5;
-            otherLineText.position.z = (node.position.z + otherNode.position.z) / 2;
-
-            // Rotate line text to face camera
-            otherLineText.lookAt(camera.position);
         }
 
         // Move text to follow node
@@ -274,6 +282,7 @@ function animate() {
         text.lookAt(camera.position);
     }
 
+    updateLineTexts();
     controls.update(deltaTime);
     composer.render(deltaTime);
 } renderer.setAnimationLoop(animate);
