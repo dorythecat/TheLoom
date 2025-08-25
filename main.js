@@ -85,19 +85,40 @@ const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
 scene.add(nexusNode);
 
 let nodeConnections = {}; // Track connections between nodes
+
+function connectNodes(nodeA, nodeB) {
+    if (!nodeConnections[nodeA.uuid]) nodeConnections[nodeA.uuid] = new Set();
+    if (!nodeConnections[nodeB.uuid]) nodeConnections[nodeB.uuid] = new Set();
+    nodeConnections[nodeA.uuid].add(nodeB.uuid);
+    nodeConnections[nodeB.uuid].add(nodeA.uuid);
+    return addLine(nodeA.position, nodeB.position);
+}
+
 function addNode(position, originNode, name, lineText = "Line") {
     const geometry = new THREE.SphereGeometry(0.5);
     const node = new THREE.Mesh(geometry, nodeMaterial);
-    node.position.set(position.x, position.y, position.z);
+    node.position.copy(position);
     scene.add(node);
-    if (!nodeConnections[originNode.uuid]) nodeConnections[originNode.uuid] = [];
-    nodeConnections[originNode.uuid].push(node);
-    nodes.push([node,
-                addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3),
-                addLine(originNode.position, node.position),
-                addText(lineText, new THREE.Vector3((originNode.position.x + node.position.x) / 2,
-                                                    (originNode.position.y + node.position.y) / 2 + 0.5,
-                                                    (originNode.position.z + node.position.z) / 2), 0.2)]);
+
+    nodes.push([
+        node,
+        addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3),
+        connectNodes(originNode, node),
+        addText(lineText, new THREE.Vector3(
+            (originNode.position.x + node.position.x) / 2,
+            (originNode.position.y + node.position.y) / 2 + 0.5,
+            (originNode.position.z + node.position.z) / 2
+        ), 0.2)
+    ]);
+}
+
+function createLoop(nodeIndexA, nodeIndexB) {
+    const nodeA = nodes[nodeIndexA][0];
+    const nodeB = nodes[nodeIndexB][0];
+    if (nodeA !== nodeB && !nodeConnections[nodeA.uuid]?.has(nodeB.uuid)) {
+        connectNodes(nodeA, nodeB);
+        addLine(nodeA.position, nodeB.position);
+    }
 }
 
 camera.position.z = 5;
@@ -188,7 +209,7 @@ function animate() {
             const [otherNode, _, otherLine, otherLineText] = nodes[j];
             if (node === otherNode) continue;
             const distance = node.position.distanceTo(otherNode.position);
-            const connected = nodeConnections[node.uuid]?.includes(otherNode);
+            const connected = nodeConnections[node.uuid]?.has(otherNode.uuid);
             if (distance < MIN_NODE_DISTANCE) { // Push apart
                 const direction = new THREE.Vector3().subVectors(node.position, otherNode.position).normalize();
                 const moveDistance = (MIN_NODE_DISTANCE - distance) / 2;
