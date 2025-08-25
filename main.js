@@ -194,7 +194,7 @@ addButton.addEventListener('click', () => {
 });
 
 function updateLines() {
-    // Elimina todas las líneas antiguas del scene y libera recursos
+    // Erase all previous lines
     for (let line of lines) {
         scene.remove(line);
         line.geometry.dispose();
@@ -202,18 +202,16 @@ function updateLines() {
     }
     lines = [];
 
-    // Vuelve a crear las líneas según las conexiones actuales
+    // Recreate lines based on current connections
     for (const [node, , , ] of nodes) {
         const connections = nodeConnections[node.uuid];
         if (!connections) continue;
         for (const otherUuid of connections) {
             const otherNode = nodes.find(n => n[0].uuid === otherUuid)?.[0];
             if (!otherNode) continue;
-            // Evita duplicados usando uuid ordenados
-            if (node.uuid < otherNode.uuid) {
-                const line = addLine(node.position, otherNode.position);
-                lines.push(line);
-            }
+            if (node.uuid >= otherNode.uuid) continue; // Avoid duplicates using ordered uuids
+            const line = addLine(node.position, otherNode.position);
+            lines.push(line);
         }
     }
 }
