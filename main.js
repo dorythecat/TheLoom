@@ -90,11 +90,11 @@ function addNode(position, originNode, name) {
     const node = new THREE.Mesh(geometry, nodeMaterial);
     node.position.set(position.x, position.y, position.z);
     scene.add(node);
-    const text = addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3);
-    const line = addLine(originNode.position, node.position);
     if (!nodeConnections[originNode.uuid]) nodeConnections[originNode.uuid] = [];
     nodeConnections[originNode.uuid].push(node);
-    nodes.push([node, text, line]);
+    nodes.push([node,
+                addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3),
+                addLine(originNode.position, node.position)]);
 }
 
 camera.position.z = 5;
