@@ -177,7 +177,7 @@ function animate() {
         pulsingTime += deltaTime;
         if (pulsingTime < pulsingDuration) {
             const scale = 1 + Math.sin(2 * Math.PI * pulsingTime / pulsingDuration) * pulsingStrength;
-            nexusNode.scale.set(scale, scale, scale);
+            for (let node of nodes) node[0].scale.set(scale, scale, scale);
         } else pulsing = false;
     }
 
