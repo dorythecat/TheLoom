@@ -185,7 +185,38 @@ addButton.addEventListener('click', () => {
                               originNode.position.y + Math.random() - 0.5, // Slight vertical variation
                               originNode.position.z + Math.sin(angle) * radius),
         originNode, `Node ${nodeCount++}`);
+
+    // 20% chance to create a loop with another random node
+    if (nodes.length > 2 && Math.random() < 0.2) {
+        const otherIndex = Math.floor(Math.random() * (nodes.length - 1));
+        createLoop(nodes.length - 1, otherIndex);
+    }
 });
+
+function updateLines() {
+    // Elimina todas las líneas antiguas del scene y libera recursos
+    for (let line of lines) {
+        scene.remove(line);
+        line.geometry.dispose();
+        if (line.material.dispose) line.material.dispose();
+    }
+    lines = [];
+
+    // Vuelve a crear las líneas según las conexiones actuales
+    for (const [node, , , ] of nodes) {
+        const connections = nodeConnections[node.uuid];
+        if (!connections) continue;
+        for (const otherUuid of connections) {
+            const otherNode = nodes.find(n => n[0].uuid === otherUuid)?.[0];
+            if (!otherNode) continue;
+            // Evita duplicados usando uuid ordenados
+            if (node.uuid < otherNode.uuid) {
+                const line = addLine(node.position, otherNode.position);
+                lines.push(line);
+            }
+        }
+    }
+}
 
 function animate() {
     const deltaTime = 1 / 60;
@@ -223,8 +254,7 @@ function animate() {
             }
 
             if (!connected) continue; // Check if nodes are connected before updating lines
-            scene.remove(otherLine); // Remove old line
-            lines[lines.indexOf(otherLine)] = nodes[j][2] = addLine(node.position, otherNode.position); // Add new line
+            updateLines();
 
             // Move line text to midpoint of line
             otherLineText.position.x = (node.position.x + otherNode.position.x) / 2;
