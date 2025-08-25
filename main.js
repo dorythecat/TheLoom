@@ -150,11 +150,10 @@ addButton.addEventListener('click', () => {
     const angle = 2 * Math.PI * Math.random();
     const radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
     const originNode = nodes[Math.floor(Math.random() * nodes.length)][0];
-    const x = originNode.position.x + Math.cos(angle) * radius;
-    const y = originNode.position.y + Math.random() - 1; // Slight vertical variation
-    const z = originNode.position.z + Math.sin(angle) * radius;
-    const position = new THREE.Vector3(x, y, z);
-    addNode(position, originNode, `Node ${nodeCount++}`);
+    addNode(new THREE.Vector3(originNode.position.x + Math.cos(angle) * radius,
+                              originNode.position.y + Math.random() - 0.5, // Slight vertical variation
+                              originNode.position.z + Math.sin(angle) * radius),
+        originNode, `Node ${nodeCount++}`);
 });
 
 function animate() {
