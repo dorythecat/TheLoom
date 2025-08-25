@@ -85,7 +85,7 @@ const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
 scene.add(nexusNode);
 
 let nodeConnections = {}; // Track connections between nodes
-function addNode(position, originNode, name) {
+function addNode(position, originNode, name, lineText = "Line") {
     const geometry = new THREE.SphereGeometry(0.5);
     const node = new THREE.Mesh(geometry, nodeMaterial);
     node.position.set(position.x, position.y, position.z);
@@ -94,7 +94,10 @@ function addNode(position, originNode, name) {
     nodeConnections[originNode.uuid].push(node);
     nodes.push([node,
                 addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3),
-                addLine(originNode.position, node.position)]);
+                addLine(originNode.position, node.position),
+                addText(lineText, new THREE.Vector3((originNode.position.x + node.position.x) / 2,
+                                                    (originNode.position.y + node.position.y) / 2 + 0.5,
+                                                    (originNode.position.z + node.position.z) / 2), 0.2)]);
 }
 
 camera.position.z = 5;
@@ -173,9 +176,9 @@ function animate() {
 
     // Adjust positions so nodes are properly spaced
     for (let i = 0; i < nodes.length; i++) {
-        const [node, text, _] = nodes[i];
+        const [node, text, _, __] = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
-            const [otherNode, _, otherLine] = nodes[j];
+            const [otherNode, _, otherLine, otherLineText] = nodes[j];
             if (node === otherNode) continue;
             const distance = node.position.distanceTo(otherNode.position);
             const connected = nodeConnections[node.uuid]?.includes(otherNode);
@@ -194,6 +197,11 @@ function animate() {
             if (!connected) continue; // Check if nodes are connected before updating lines
             scene.remove(otherLine); // Remove old line
             lines[lines.indexOf(otherLine)] = nodes[j][2] = addLine(node.position, otherNode.position); // Add new line
+
+            // Move line text to midpoint of line
+            otherLineText.position.x = (node.position.x + otherNode.position.x) / 2;
+            otherLineText.position.y = (node.position.y + otherNode.position.y) / 2 + 0.5;
+            otherLineText.position.z = (node.position.z + otherNode.position.z) / 2;
         }
 
         // Move text to follow node
