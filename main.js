@@ -202,6 +202,9 @@ function animate() {
             otherLineText.position.x = (node.position.x + otherNode.position.x) / 2;
             otherLineText.position.y = (node.position.y + otherNode.position.y) / 2 + 0.5;
             otherLineText.position.z = (node.position.z + otherNode.position.z) / 2;
+
+            // Rotate line text to face camera
+            otherLineText.lookAt(camera.position);
         }
 
         // Move text to follow node
@@ -210,6 +213,9 @@ function animate() {
         text.position.x = node.position.x;
         text.position.y = node.position.y + (node === nexusNode ? 1.5 : 1); // The nexus node is slightly bigger
         text.position.z = node.position.z;
+
+        // Rotate text to face camera
+        text.lookAt(camera.position);
     }
 
     controls.update(deltaTime);
