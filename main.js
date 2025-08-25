@@ -150,6 +150,10 @@ addButton.textContent = 'Add Node';
 document.body.appendChild(addButton);
 let nodeCount = 1;
 addButton.addEventListener('click', () => {
+    if (influence <= 0) return; // Not enough influence to add a node
+    influence--;
+    influenceDiv.textContent = `Influence: ${influence}`;
+
     const angle = 2 * Math.PI * Math.random();
     const radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
     const originNode = nodes[Math.floor(Math.random() * nodes.length)][0];
