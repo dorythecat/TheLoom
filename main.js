@@ -146,12 +146,15 @@ const addButton = document.createElement('button');
 addButton.style.position = 'absolute';
 addButton.style.top = '50px';
 addButton.style.left = '10px';
-addButton.textContent = 'Add Node';
+addButton.textContent = 'Add Node (Cost: 10)';
 document.body.appendChild(addButton);
 let nodeCount = 1;
+let nodePrice = 10;
 addButton.addEventListener('click', () => {
-    if (influence <= 0) return; // Not enough influence to add a node
-    influence--;
+    if (influence <= nodePrice) return; // Not enough influence to add a node
+    influence -= nodePrice;
+    nodePrice = Math.ceil(nodePrice * 1.2); // Increase price for next node
+    addButton.textContent = `Add Node (Cost: ${nodePrice})`;
     influenceDiv.textContent = `Influence: ${influence}`;
 
     const angle = 2 * Math.PI * Math.random();
