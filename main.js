@@ -157,8 +157,19 @@ function genInfluence() {
     pulsingTime = 0;
 }
 
+// Clicked on screen
 renderer.domElement.addEventListener('click', () => {
     genInfluence();
+});
+
+// CLicked spacer
+let canGenerate = true;
+window.addEventListener('keydown', (event) => {
+    if (event.code === 'Space' && canGenerate) {
+        genInfluence();
+        canGenerate = false; // 300ms delay
+        setTimeout(() => { canGenerate = true; }, 300);
+    }
 });
 
 // Button to add nodes and lines for testing
