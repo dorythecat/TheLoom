@@ -113,10 +113,7 @@ function addNode(position, originNode, name, lineText = "Line") {
 function createLoop(nodeIndexA, nodeIndexB) {
     const nodeA = nodes[nodeIndexA][0];
     const nodeB = nodes[nodeIndexB][0];
-    if (nodeA !== nodeB && !nodeConnections[nodeA.uuid]?.has(nodeB.uuid)) {
-        connectNodes(nodeA, nodeB);
-        addLine(nodeA.position, nodeB.position);
-    }
+    if (nodeA !== nodeB && !nodeConnections[nodeA.uuid]?.has(nodeB.uuid)) connectNodes(nodeA, nodeB);
 }
 
 camera.position.z = 5;
