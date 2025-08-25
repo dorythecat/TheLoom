@@ -97,7 +97,7 @@ function connectNodes(nodeA, nodeB, text = "Line") {
     const mid = new THREE.Vector3().addVectors(nodeA.position, nodeB.position).multiplyScalar(0.5);
     lineTexts[key] = addText(text, new THREE.Vector3(mid.x, mid.y + 0.5, mid.z), 0.2);
 
-    return addLine(nodeA.position, nodeB.position);
+    addLine(nodeA.position, nodeB.position);
 }
 
 function addNode(position, originNode, name, lineText = "Line") {
