@@ -151,7 +151,7 @@ document.body.appendChild(addButton);
 let nodeCount = 1;
 let nodePrice = 10;
 addButton.addEventListener('click', () => {
-    if (influence <= nodePrice) return; // Not enough influence to add a node
+    if (influence < nodePrice) return; // Not enough influence to add a node
     influence -= nodePrice;
     nodePrice = Math.ceil(nodePrice * 1.2); // Increase price for next node
     addButton.textContent = `Add Node (Cost: ${nodePrice})`;
