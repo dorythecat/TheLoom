@@ -318,12 +318,12 @@ function animate() {
             const connected = nodeConnections[node.uuid]?.has(otherNode.uuid);
             if (distance < MIN_NODE_DISTANCE) { // Push apart
                 const direction = new THREE.Vector3().subVectors(node.position, otherNode.position).normalize();
-                const moveDistance = (MIN_NODE_DISTANCE - distance) / 2;
+                const moveDistance = (MIN_NODE_DISTANCE - distance) * deltaTime / 2;
                 node.position.addScaledVector(direction, moveDistance);
                 otherNode.position.addScaledVector(direction, -moveDistance);
             } else if (distance > MAX_NODE_DISTANCE && connected) { // Only pull together connected nodes
                 const direction = new THREE.Vector3().subVectors(otherNode.position, node.position).normalize();
-                const moveDistance = (distance - MAX_NODE_DISTANCE) / 2;
+                const moveDistance = (distance - MAX_NODE_DISTANCE) * deltaTime / 2;
                 node.position.addScaledVector(direction, moveDistance);
                 otherNode.position.addScaledVector(direction, -moveDistance);
             }
