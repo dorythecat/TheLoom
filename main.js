@@ -10,25 +10,193 @@ const MIN_NODE_DISTANCE = 3;
 const MAX_NODE_DISTANCE = 5;
 
 let NODE_CONNECTIONS = { // List of possible node connections
-    "Nexus": ["Tree"],
-    "Tree": ["Branch", "Root"],
-    "Branch": ["Leaf"],
-    "Leaf": [],
-    "Root": ["Soil", "Rock", "Nutrients"],
-    "Soil": ["Rock", "Water"],
-    "Rock": [],
-    "Nutrients": ["Tree"],
+    "Nexus": ["Life", "Knowledge", "Power"],
+
+    // From Nexus
+    "Life": ["Nature", "Memory", "Growth"],
+    "Knowledge": ["Wisdom", "Memory", "Learning"],
+    "Power": ["Strength", "Energy", "Force"],
+
+    // From Life
+    "Nature": ["Forest", "Mountain", "Fire"],
+    "Memory": ["History", "Dreams", "Sadness"], // Also from Knowledge
+    "Growth": ["Evolution", "Change", "Time"],
+
+    // From Knowledge
+    "Wisdom": ["Philosophy", "Insight", "Truth"],
+    "Learning": ["Education", "Curiosity", "Discovery"],
+
+    // From Power
+    "Strength": ["Courage", "Endurance", "Force"],
+    "Energy": ["Light", "Electricity", "Heat"],
+    "Force": ["Gravity", "Magnetism", "Abuse"],
+
+    // From Nature
+    "Forest": ["Animals", "Plants", "Fire"],
+    "Mountain": ["Rocks", "Snow", "Ice", "River"],
+    "River": ["Water", "Fish", "Flow"],
+    "Fire": ["Heat", "Light", "Destruction"],
+
+    // From Memory
+    "History": ["Past", "Future", "Legacy"],
+    "Dreams": ["Imagination", "Fantasy", "Hope"],
+    "Sadness": ["Grief", "Loss", "Melancholy"],
+
+    // From Growth
+    "Evolution": ["Survival", "Adaptation"],
+    "Change": ["Transformation"],
+    "Time": ["Future", "Present", "Past"],
+
+    // From Time
+    "Future": ["Past", "Present"],
+    "Present": ["Past", "Future"],
+    "Past": ["Present", "Future"],
+
+    // From Wisdom
+    "Philosophy": ["Ethics", "Logic", "Reason"],
+    "Insight": ["Understanding", "Clarity", "Awareness", "Wisdom"],
+    "Truth": ["Reality", "Fact", "Honesty"],
+
+    // From Learning
+    "Education": ["Knowledge", "Skills"],
+    "Curiosity": ["Exploration", "Inquiry", "Wonder"],
+    "Discovery": ["Invention", "Innovation", "Breakthrough"],
+
+    // From Strength
+    "Courage": ["Bravery", "Valor", "Heroism"],
+    "Endurance": ["Stamina", "Resilience", "Perseverance"],
+
+    // From Energy
+    "Light": ["Sun"],
+    "Electricity": ["Current", "Voltage", "Circuit"],
+    "Heat": ["Temperature", "Thermodynamics", "Warmth", "Light"],
+
+    // From Force
+    "Gravity": ["Mass", "Weight", "Orbit"],
+    "Magnetism": ["Magnet", "Field"],
+    "Momentum": ["Inertia", "Velocity", "Acceleration"],
+
+    // From Forest
+    "Animals": ["Mammals", "Birds", "Reptiles"],
+    "Plants": ["Flowers", "Trees", "Fungi"],
+
+    // From Plants
+    "Flowers": ["Petals", "Pollen", "Fragrance"],
+    "Trees": ["Branches", "Roots"],
+    "Fungi": ["Mushrooms", "Spores", "Mycelium"],
+
+    // From Tree
+    "Branches": ["Twigs", "Bark", "Sap", "Leaves"],
+    "Roots": ["Soil", "Nutrients", "Water"],
+
+    // From Branches
+    "Leaves": ["Photosynthesis", "Shade", "Decay"],
+    "Bark": ["Protection", "Texture", "Growth Rings"],
+    "Sap": ["Resin", "Maple Syrup", "Rubber"],
+
+    // From Leaves
+    "Photosynthesis": ["Oxygen", "Water", "Glucose", "Light"],
+    "Shade": ["Coolness", "Shelter"],
+    "Decay": ["Compost", "Nutrients", "Soil", "Death"],
+
+    // Miscellaneous connections
+    "Death": ["Life"],
+    "Water": ["Ice"]
 }
 
 let NODE_VERBS = { // List of possible node verbs
     "Nexus": [""],
-    "Tree": ["grows", "has"],
-    "Branch": ["grows"],
-    "Leaf": [],
-    "Root": ["utilizes", "anchors to", "absorbs"],
-    "Soil": ["covers", "absorbs"],
-    "Rock": [],
-    "Nutrients": ["feed"]
+
+    // From Nexus
+    "Life": ["is", "gives", "nurtures"],
+    "Knowledge": ["evolves into", "is", "requires"],
+    "Power": ["comes from", "is", "is given by"],
+
+    // From Life
+    "Nature": ["lives in", "lifts", "fuels"],
+    "Memory": ["holds", "remembers", "is lost with"],
+    "Growth": ["leads to", "is", "requires"],
+
+    // From Knowledge
+    "Wisdom": ["leads to", "is", "seeks"],
+    "Learning": ["comes from", "requires", "leads to"],
+
+    // From Power
+    "Strength": ["comes from", "is", "is tested by"],
+    "Energy": ["is", "is", "is"],
+    "Force": ["is", "is", "can suffer"],
+
+    // From Nature
+    "Forest": ["contains", "is made of", "is burned by"],
+    "Mountain": ["is made of", "is covered in", "is covered in", "is carved by"],
+    "River": ["is", "is filled with", "is defined by"],
+    "Fire": ["is", "gives", "brings"],
+
+    // From Memory
+    "History": ["is", "shapes", "is preserved by"],
+    "Dreams": ["are fueled by", "inspire", "bring"],
+    "Sadness": ["comes from", "is caused by", "is eased by"],
+
+    // From Growth
+    "Evolution": ["is driven by", "leads to"],
+    "Change": ["is", "leads to"],
+    "Time": ["is", "is", "is"],
+
+    // From Time
+    "Future": ["is shaped by", "comes after"],
+    "Present": ["is shaped by", "comes before"],
+    "Past": ["shapes", "shapes"],
+
+    // From Wisdom
+    "Philosophy": ["leads to", "uses", "values"],
+    "Insight": ["brings", "gives", "is", "requires"],
+    "Truth": ["is", "is", "requires"],
+
+    // From Learning
+    "Education": ["provides", "teaches"],
+    "Curiosity": ["leads to", "fuels", "inspires"],
+    "Discovery": ["leads to", "fuels", "brings"],
+
+    // From Strength
+    "Courage": ["is shown by", "is needed for", "is tested by"],
+    "Endurance": ["is built by", "is needed for", "is tested by"],
+
+    // From Energy
+    "Light": ["comes from"],
+    "Electricity": ["is", "is", "powers"],
+    "Heat": ["is", "is", "gives", "gives"],
+
+    // From Force
+    "Gravity": ["requires", "gives", "defines"],
+    "Magnetism": ["comes from", "is"],
+    "Momentum": ["comes from", "is", "is"],
+
+    // From Forest
+    "Animals": ["are", "are", "are"],
+    "Plants": ["are", "are", "are"],
+
+    // From Plants
+    "Flowers": ["have", "carry", "give"],
+    "Trees": ["have", "have"],
+    "Fungi": ["are", "release", "spread"],
+
+    // From Tree
+    "Branches": ["have", "have", "produce", "have"],
+    "Roots": ["are in", "absorb", "draw"],
+
+    // From Branches
+    "Leaves": ["perform", "provide", "eventually"],
+    "Bark": ["provides", "has", "shows"],
+    "Sap": ["is", "is", "is"],
+
+    // From Leaves
+    "Photosynthesis": ["takes", "takes", "produces", "requires"],
+    "Shade": ["provides", "offers"],
+    "Decay": ["creates", "returns", "enriches", "is"],
+
+    // Miscellaneous connections
+    "Death": ["ends"],
+    "Water": ["freezes into"]
 }
 
 let nodes = [];
