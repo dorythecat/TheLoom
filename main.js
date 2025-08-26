@@ -9,13 +9,23 @@ import { FlyControls } from 'three/examples/jsm/controls/FlyControls'
 const MIN_NODE_DISTANCE = 3;
 const MAX_NODE_DISTANCE = 5;
 
-const NODE_NAMES = [ // List of possible node names
-    "Tree",
-    "Branch",
-    "Leaf",
-    "Root",
-    "Soil"
-]
+let NODE_CONNECTIONS = { // List of possible node connections
+    "Nexus": ["Tree"],
+    "Tree": ["Branch", "Root"],
+    "Branch": ["Leaf"],
+    "Leaf": [],
+    "Root": ["Soil", "Rock", "Nutrients"],
+    "Soil": ["Rock", "Water"]
+}
+
+let NODE_VERBS = { // List of possible node verbs
+    "Nexus": ["creates"],
+    "Tree": ["grows", "has"],
+    "Branch": ["grows"],
+    "Leaf": [],
+    "Root": ["utilizes", "anchors to", "absorbs"],
+    "Soil": ["covers", "absorbs"]
+}
 
 let nodes = [];
 
@@ -45,7 +55,7 @@ loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regu
 
     // Add initial text above the nexus node
     const text = addText('Nexus', new THREE.Vector3(0, 1.5, 0), 0.4, true);
-    nodes.push([nexusNode, text]);
+    nodes.push([nexusNode, text, 'Nexus']);
 }).catch(err => {
     console.error('Error loading font:', err);
 });
@@ -115,7 +125,7 @@ function addNode(position, originNode, name, connectionText = "Line") {
     scene.add(node);
 
     connectNodes(originNode, node, connectionText);
-    nodes.push([node, addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3)]);
+    nodes.push([node, addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3), name]);
 }
 
 let loopCount = 0;
@@ -126,6 +136,37 @@ function createLoop(nodeIndexA, nodeIndexB, connectionText = "Loop") {
         connectNodes(nodeA, nodeB, connectionText);
         loopCount++;
     }
+}
+
+// Add a node with names and connections handled
+function addSmartNode() {
+    let [lastNode, _, lastName] = nodes[nodes.length - 1];
+
+    let possibleNames = NODE_CONNECTIONS[lastName] || [];
+    let offset = 2;
+    while (possibleNames.length === 0) {
+        if (offset >= nodes.length) return; // No valid nodes to base off of
+        [lastNode, _, lastName] = nodes[nodes.length - offset++];
+
+        possibleNames = NODE_CONNECTIONS[lastName] || [];
+    }
+    const possibleVerbs = NODE_VERBS[lastName] || [];
+
+    let newIndex = Math.floor(Math.random() * possibleNames.length);
+    let newName = possibleNames[newIndex];
+    let newVerb = possibleVerbs[newIndex];
+
+    NODE_CONNECTIONS[lastName].splice(newIndex, 1);
+    NODE_VERBS[lastName].splice(newIndex, 1);
+
+    let angle = 2 * Math.PI * Math.random();
+    let radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
+    let newPosition = new THREE.Vector3(
+        lastNode.position.x + Math.cos(angle) * radius,
+        lastNode.position.y + Math.random() - 0.5, // Slight vertical variation
+        lastNode.position.z + Math.sin(angle) * radius
+    );
+    addNode(newPosition, lastNode, newName, newVerb);
 }
 
 camera.position.z = 5;
@@ -201,19 +242,7 @@ addButton.addEventListener('click', () => {
     addButton.textContent = `Add Node (Cost: ${nodePrice})`;
     influenceDiv.textContent = `Influence: ${influence}`;
 
-    const angle = 2 * Math.PI * Math.random();
-    const radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
-    const originNode = nodes[Math.floor(Math.random() * nodes.length)][0];
-    addNode(new THREE.Vector3(originNode.position.x + Math.cos(angle) * radius,
-                              originNode.position.y + Math.random() - 0.5, // Slight vertical variation
-                              originNode.position.z + Math.sin(angle) * radius),
-        originNode, NODE_NAMES[nodes.length % NODE_NAMES.length - 1]);
-
-    // 20% chance to create a loop with another random node
-    if (nodes.length > 2 && Math.random() < 0.2) {
-        const otherIndex = Math.floor(Math.random() * (nodes.length - 1));
-        createLoop(nodes.length - 1, otherIndex);
-    }
+    addSmartNode();
 });
 
 function updateLines() {
@@ -274,9 +303,9 @@ function animate() {
 
     // Adjust positions so nodes are properly spaced
     for (let i = 0; i < nodes.length; i++) {
-        const [node, text] = nodes[i];
+        const [node, text, _] = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
-            const [otherNode, _] = nodes[j];
+            const [otherNode, _, __] = nodes[j];
             if (node === otherNode) continue;
             const distance = node.position.distanceTo(otherNode.position);
             const connected = nodeConnections[node.uuid]?.has(otherNode.uuid);
