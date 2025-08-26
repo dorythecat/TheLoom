@@ -110,10 +110,14 @@ function addNode(position, originNode, name, lineText = "Line") {
     nodes.push([node, addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3)]);
 }
 
+let loopCount = 0;
 function createLoop(nodeIndexA, nodeIndexB) {
     const nodeA = nodes[nodeIndexA][0];
     const nodeB = nodes[nodeIndexB][0];
-    if (nodeA !== nodeB && !nodeConnections[nodeA.uuid]?.has(nodeB.uuid)) connectNodes(nodeA, nodeB);
+    if (nodeA !== nodeB && !nodeConnections[nodeA.uuid]?.has(nodeB.uuid)) {
+        connectNodes(nodeA, nodeB);
+        loopCount++;
+    }
 }
 
 camera.position.z = 5;
