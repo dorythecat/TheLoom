@@ -68,7 +68,7 @@ function addText(text, position, size = 0.4, spinning = false) {
 const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
 
 let lines = [];
-function addLine(start, end, text = "Line") {
+function addLine(start, end) {
     const points = [];
     points.push(start);
     points.push(end);
