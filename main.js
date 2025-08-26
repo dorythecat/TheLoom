@@ -247,10 +247,10 @@ addButton.textContent = 'Add Node (Cost: 10)';
 document.body.appendChild(addButton);
 let nodePrice = 10;
 addButton.addEventListener('click', () => {
-    if (influence < nodePrice) return; // Not enough influence to add a node
-    influence -= nodePrice;
-    nodePrice = Math.ceil(nodePrice * Math.log10(nodePrice * 2)); // Increase price for next node
-    addButton.textContent = `Add Node (Cost: ${nodePrice})`;
+    if (influence < Math.ceil(nodePrice)) return; // Not enough influence to add a node
+    influence -= Math.ceil(nodePrice);
+    nodePrice = nodePrice * Math.log10(2 * nodePrice); // Increase price for next node
+    addButton.textContent = `Add Node (Cost: ${Math.ceil(nodePrice)})`;
     influenceDiv.textContent = `Influence: ${influence}`;
 
     addSmartNode();
@@ -262,8 +262,7 @@ function updateLines() {
         scene.remove(line);
         line.geometry.dispose();
         if (line.material.dispose) line.material.dispose();
-    }
-    lines = [];
+    } lines = [];
 
     // Recreate lines based on current connections
     for (const [node, , , ] of nodes) {
@@ -287,8 +286,7 @@ function updateLineTexts() {
             if (node.uuid === uuidA) nodeA = node;
             else if (node.uuid === uuidB) nodeB = node;
             if (nodeA && nodeB) break;
-        }
-        if (!nodeA || !nodeB) continue;
+        } if (!nodeA || !nodeB) continue;
         const textMesh = lineTexts[key];
         textMesh.position.x = (nodeA.position.x + nodeB.position.x) / 2;
         textMesh.position.y = (nodeA.position.y + nodeB.position.y) / 2 + 0.5;
