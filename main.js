@@ -6,8 +6,12 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { FlyControls } from 'three/examples/jsm/controls/FlyControls'
 
+// Settings
 const MIN_NODE_DISTANCE = 3;
 const MAX_NODE_DISTANCE = 5;
+
+const START_PRICE = 10;
+const MAX_PRICE = 100000;
 
 let NODE_CONNECTIONS = { // List of possible node connections
     "Nexus": ["Life", "Knowledge", "Power"],
@@ -407,19 +411,24 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
+let nodePrice = START_PRICE; // Price of adding a node
+let additionCount = 1;
+
 // Button to add nodes and lines for testing
 const addButton = document.createElement('button');
 addButton.style.position = 'absolute';
 addButton.style.top = '50px';
 addButton.style.left = '10px';
-addButton.textContent = 'Connect (Cost: 10)';
+addButton.textContent = `Connect (Cost: ${nodePrice})`;
 document.body.appendChild(addButton);
-let nodePrice = 10;
 addButton.addEventListener('click', () => {
-    if (influence < Math.ceil(nodePrice)) return; // Not enough influence to add a node
+    //if (influence < Math.ceil(nodePrice)) return; // Not enough influence to add a node
     if (!addSmartNode()) return; // No valid connections could be made
-    influence -= Math.ceil(nodePrice);
-    nodePrice = nodePrice * Math.log10(2 * nodePrice); // Increase price for next node
+    //influence -= Math.ceil(nodePrice);
+    additionCount++;
+    let a = additionCount / Object.keys(NODE_CONNECTIONS).length;
+    a = a > 1 ? 1 : a;
+    nodePrice = a * a * a * (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE; // Increase price for next node
     addButton.textContent = `Connect (Cost: ${Math.ceil(nodePrice)})`;
     influenceDiv.textContent = `Influence: ${influence}`;
 });
