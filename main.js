@@ -270,8 +270,7 @@ function updateLines() {
         if (!connections) continue;
         for (const otherUuid of connections) {
             const otherNode = nodes.find(n => n[0].uuid === otherUuid)?.[0];
-            if (!otherNode) continue;
-            if (node.uuid >= otherNode.uuid) continue; // Avoid duplicates using ordered uuids
+            if (!otherNode || node.uuid >= otherNode.uuid) continue; // Avoid duplicates using ordered uuids
             const line = addLine(node.position, otherNode.position);
             lines.push(line);
         }
