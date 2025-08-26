@@ -87,7 +87,7 @@ scene.add(nexusNode);
 let nodeConnections = {}; // Track connections between nodes
 let lineTexts = {}; // Track line texts
 
-function connectNodes(nodeA, nodeB, text = "Line") {
+function connectNodes(nodeA, nodeB, text) {
     if (!nodeConnections[nodeA.uuid]) nodeConnections[nodeA.uuid] = new Set();
     if (!nodeConnections[nodeB.uuid]) nodeConnections[nodeB.uuid] = new Set();
     nodeConnections[nodeA.uuid].add(nodeB.uuid);
@@ -100,22 +100,22 @@ function connectNodes(nodeA, nodeB, text = "Line") {
     addLine(nodeA.position, nodeB.position);
 }
 
-function addNode(position, originNode, name, lineText = "Line") {
+function addNode(position, originNode, name, connectionText = "Line") {
     const geometry = new THREE.SphereGeometry(0.5);
     const node = new THREE.Mesh(geometry, nodeMaterial);
     node.position.copy(position);
     scene.add(node);
 
-    connectNodes(originNode, node);
+    connectNodes(originNode, node, connectionText);
     nodes.push([node, addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3)]);
 }
 
 let loopCount = 0;
-function createLoop(nodeIndexA, nodeIndexB) {
+function createLoop(nodeIndexA, nodeIndexB, connectionText = "Loop") {
     const nodeA = nodes[nodeIndexA][0];
     const nodeB = nodes[nodeIndexB][0];
     if (nodeA !== nodeB && !nodeConnections[nodeA.uuid]?.has(nodeB.uuid)) {
-        connectNodes(nodeA, nodeB);
+        connectNodes(nodeA, nodeB, connectionText);
         loopCount++;
     }
 }
