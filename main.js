@@ -316,6 +316,7 @@ function createLoop(nodeIndexA, nodeIndexB, connectionText = "Loop") {
 
 // Add a node with names and connections handled
 function addSmartNode() { // Return a boolean indicating whether a new connection was made or not
+    if (nodes.length === 0) return false; // No nodes to base off of
     let [lastNode, _, lastName] = nodes[nodes.length - 1];
 
     let possibleNames = NODE_CONNECTIONS[lastName] || [];
@@ -326,7 +327,7 @@ function addSmartNode() { // Return a boolean indicating whether a new connectio
 
         possibleNames = NODE_CONNECTIONS[lastName] || [];
     }
-    const possibleVerbs = NODE_VERBS[lastName] || [];
+    const possibleVerbs = NODE_VERBS[lastName];
 
     let newIndex = Math.floor(Math.random() * possibleNames.length);
     let newName = possibleNames[newIndex];
@@ -422,9 +423,9 @@ addButton.style.left = '10px';
 addButton.textContent = `Connect (Cost: ${nodePrice})`;
 document.body.appendChild(addButton);
 addButton.addEventListener('click', () => {
-    //if (influence < Math.ceil(nodePrice)) return; // Not enough influence to add a node
+    if (influence < Math.ceil(nodePrice)) return; // Not enough influence to add a node
     if (!addSmartNode()) return; // No valid connections could be made
-    //influence -= Math.ceil(nodePrice);
+    influence -= Math.ceil(nodePrice);
     additionCount++;
     let a = additionCount / Object.keys(NODE_CONNECTIONS).length;
     a = a > 1 ? 1 : a;
