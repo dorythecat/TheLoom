@@ -244,17 +244,16 @@ const addButton = document.createElement('button');
 addButton.style.position = 'absolute';
 addButton.style.top = '50px';
 addButton.style.left = '10px';
-addButton.textContent = 'Add Node (Cost: 10)';
+addButton.textContent = 'Connect (Cost: 10)';
 document.body.appendChild(addButton);
 let nodePrice = 10;
 addButton.addEventListener('click', () => {
     if (influence < Math.ceil(nodePrice)) return; // Not enough influence to add a node
+    if (!addSmartNode()) return; // No valid connections could be made
     influence -= Math.ceil(nodePrice);
     nodePrice = nodePrice * Math.log10(2 * nodePrice); // Increase price for next node
-    addButton.textContent = `Add Node (Cost: ${Math.ceil(nodePrice)})`;
+    addButton.textContent = `Connect (Cost: ${Math.ceil(nodePrice)})`;
     influenceDiv.textContent = `Influence: ${influence}`;
-
-    addSmartNode();
 });
 
 function updateLines() {
