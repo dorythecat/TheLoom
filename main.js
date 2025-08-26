@@ -143,13 +143,13 @@ function createLoop(nodeIndexA, nodeIndexB, connectionText = "Loop") {
 }
 
 // Add a node with names and connections handled
-function addSmartNode() {
+function addSmartNode() { // Return a boolean indicating wether a new connection was made or not
     let [lastNode, _, lastName] = nodes[nodes.length - 1];
 
     let possibleNames = NODE_CONNECTIONS[lastName] || [];
     let offset = 2;
     while (possibleNames.length === 0) {
-        if (offset >= nodes.length) return; // No valid nodes to base off of
+        if (offset >= nodes.length) return false; // No valid nodes to base off of
         [lastNode, _, lastName] = nodes[nodes.length - offset++];
 
         possibleNames = NODE_CONNECTIONS[lastName] || [];
@@ -167,7 +167,7 @@ function addSmartNode() {
     const existingIndex = nodes.findIndex(n => n[2] === newName);
     if (existingIndex !== -1) {
         createLoop(nodes.length - 1, existingIndex, newVerb);
-        return;
+        return true;
     }
 
     let angle = 2 * Math.PI * Math.random();
@@ -178,6 +178,7 @@ function addSmartNode() {
         lastNode.position.z + Math.sin(angle) * radius
     );
     addNode(newPosition, lastNode, newName, newVerb);
+    return true;
 }
 
 camera.position.z = 5;
