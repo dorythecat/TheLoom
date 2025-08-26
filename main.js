@@ -164,9 +164,9 @@ function addSmartNode() {
     NODE_VERBS[lastName].splice(newIndex, 1);
 
     // Check if a node with this name already exists, and loop to it if so
-    for (let [_, __, existingName] of nodes) {
-        if (existingName !== newName) continue;
-        createLoop(nodes.length - 1, nodes.findIndex(n => n[2] === newName), newVerb);
+    const existingIndex = nodes.findIndex(n => n[2] === newName);
+    if (existingIndex !== -1) {
+        createLoop(nodes.length - 1, existingIndex, newVerb);
         return;
     }
 
