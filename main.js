@@ -143,7 +143,7 @@ function createLoop(nodeIndexA, nodeIndexB, connectionText = "Loop") {
 }
 
 // Add a node with names and connections handled
-function addSmartNode() { // Return a boolean indicating wether a new connection was made or not
+function addSmartNode() { // Return a boolean indicating whether a new connection was made or not
     let [lastNode, _, lastName] = nodes[nodes.length - 1];
 
     let possibleNames = NODE_CONNECTIONS[lastName] || [];
