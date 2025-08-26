@@ -282,7 +282,6 @@ function updateLineTexts() {
         textMesh.position.x = (nodeA.position.x + nodeB.position.x) / 2;
         textMesh.position.y = (nodeA.position.y + nodeB.position.y) / 2 + 0.5;
         textMesh.position.z = (nodeA.position.z + nodeB.position.z) / 2;
-        textMesh.lookAt(camera.position);
     }
 }
 
@@ -331,9 +330,6 @@ function animate() {
         text.position.x = node.position.x;
         text.position.y = node.position.y + (node === nexusNode ? 1.5 : 1); // The nexus node is slightly bigger
         text.position.z = node.position.z;
-
-        // Rotate text to face camera
-        text.lookAt(camera.position);
     }
 
     updateLineTexts();
