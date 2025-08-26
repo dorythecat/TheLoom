@@ -293,8 +293,8 @@ function updateLineTexts() {
     }
 }
 
-function animate(deltaTime) {
-    deltaTime /= 1000000; // Convert to milliseconds
+function animate() {
+    const deltaTime = 1 / 60; // Fixed timestep for consistency
 
     // Rotate spinning text
     for (let textMesh of spinningText) textMesh.rotation.y += deltaTime;
