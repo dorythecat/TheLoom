@@ -153,7 +153,9 @@ const pulsingDuration = 0.2; // seconds
 const pulsingStrength = 0.1;
 
 function genInfluence() {
-    influence += nodes.length;
+    let mul = 1;
+    for (let i = 0; i < loopCount; i++) mul *= 2; // Each loop doubles the influence gain
+    influence += nodes.length * mul;
     influenceDiv.textContent = `Influence: ${influence}`;
 
     // Start pulsing effect
