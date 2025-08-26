@@ -105,7 +105,7 @@ let NODE_CONNECTIONS = { // List of possible node connections
 }
 
 let NODE_VERBS = { // List of possible node verbs
-    "Nexus": [""],
+    "Nexus": ["", "", ""],
 
     // From Nexus
     "Life": ["is", "gives", "nurtures"],
