@@ -9,6 +9,14 @@ import { FlyControls } from 'three/examples/jsm/controls/FlyControls'
 const MIN_NODE_DISTANCE = 3;
 const MAX_NODE_DISTANCE = 5;
 
+const NODE_NAMES = [ // List of possible node names
+    "Tree",
+    "Branch",
+    "Leaf",
+    "Root",
+    "Soil"
+]
+
 let nodes = [];
 
 const scene = new THREE.Scene();
@@ -185,7 +193,6 @@ addButton.style.top = '50px';
 addButton.style.left = '10px';
 addButton.textContent = 'Add Node (Cost: 10)';
 document.body.appendChild(addButton);
-let nodeCount = 1;
 let nodePrice = 10;
 addButton.addEventListener('click', () => {
     if (influence < nodePrice) return; // Not enough influence to add a node
@@ -200,7 +207,7 @@ addButton.addEventListener('click', () => {
     addNode(new THREE.Vector3(originNode.position.x + Math.cos(angle) * radius,
                               originNode.position.y + Math.random() - 0.5, // Slight vertical variation
                               originNode.position.z + Math.sin(angle) * radius),
-        originNode, `Node ${nodeCount++}`);
+        originNode, NODE_NAMES[nodes.length % NODE_NAMES.length - 1]);
 
     // 20% chance to create a loop with another random node
     if (nodes.length > 2 && Math.random() < 0.2) {
