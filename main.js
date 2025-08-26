@@ -293,11 +293,11 @@ function updateLineTexts() {
     }
 }
 
-function animate() {
-    const deltaTime = 1 / 60;
+function animate(deltaTime) {
+    deltaTime /= 1000000; // Convert to milliseconds
 
     // Rotate spinning text
-    for (let textMesh of spinningText) textMesh.rotation.y += 0.01;
+    for (let textMesh of spinningText) textMesh.rotation.y += deltaTime;
 
     // Handle pulsing effect
     if (pulsing) {
