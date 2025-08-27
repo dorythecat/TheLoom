@@ -334,11 +334,9 @@ function updateLineTexts() {
 
 // Instance transforms
 function commitInstance(i, pulseMul = 1) {
-    const rec = nodes[i];
-    const s = rec.baseScale * pulseMul;
-    const scale = new THREE.Vector3(s, s, s);
-    const m = new THREE.Matrix4().compose(rec.position, new THREE.Quaternion(), scale);
-    nodeIMesh.setMatrixAt(i, m);
+    const s = nodes[i].baseScale * pulseMul;
+    nodeIMesh.setMatrixAt(i, new THREE.Matrix4()
+        .compose(nodes[i].position,new THREE.Quaternion(), new THREE.Vector3(s, s, s)));
 }
 
 function commitAll(pulseMul = 1) {
