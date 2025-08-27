@@ -333,14 +333,14 @@ function updateLineTexts() {
 }
 
 // Instance transforms
-function commitInstance(i, pulseMul = 1, offset = new THREE.Vector3()) {
+function commitInstance(i, pulseMul = 1) {
     const s = nodes[i].baseScale * pulseMul;
     nodeIMesh.setMatrixAt(i, new THREE.Matrix4()
-        .compose(nodes[i].position.add(offset), new THREE.Quaternion(), new THREE.Vector3(s, s, s)));
+        .compose(nodes[i].position, new THREE.Quaternion(), new THREE.Vector3(s, s, s)));
 }
 
-function commitAll(pulseMul, offset) {
-    for (let i = 0; i < nodes.length; i++) commitInstance(i, pulseMul, offset);
+function commitAll(pulseMul) {
+    for (let i = 0; i < nodes.length; i++) commitInstance(i, pulseMul);
     nodeIMesh.count = nodes.length;
     nodeIMesh.instanceMatrix.needsUpdate = true;
 }
