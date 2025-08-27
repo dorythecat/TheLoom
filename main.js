@@ -386,13 +386,11 @@ function createLoop(nodeIndexA, nodeIndexB, connectionText) {
 // Remaining targets for a node index
 function remainingTargetsFor(nodeIndex) {
     const baseName = nodes[nodeIndex].name;
-    const allowed = NODE_CONNECTIONS[baseName] || [];
-    const verbs = NODE_VERBS[baseName] || [];
+    const allowed = NODE_CONNECTIONS[baseName] || [], verbs = NODE_VERBS[baseName] || [];
     const connectedNames = new Set(
         [...(nodeConnections[nodeIndex] || new Set())].map(j => nodes[j].name)
     );
-    const remaining = [];
-    const remainingVerbs = [];
+    const remaining = [], remainingVerbs = [];
     for (let i = 0; i < allowed.length; i++) {
         const t = allowed[i];
         if (connectedNames.has(t)) continue;
@@ -499,7 +497,7 @@ addButton.addEventListener('click', () => {
     influence -= Math.ceil(nodePrice);
     additionCount++;
     let a = additionCount / maxNodes;
-    nodePrice = a * a * a *ebuildLinesAndTexts(); (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE; // Smoothstep
+    nodePrice = a * a * a * (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE; // Smoothstep
     addButton.textContent = `Connect (Cost: ${Math.ceil(nodePrice)})`;
     influenceDiv.textContent = `Influence: ${influence}`;
 });
