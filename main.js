@@ -203,183 +203,227 @@ const NODE_VERBS = { // List of possible node verbs
     "Water": ["freezes into"]
 }
 
-const maxNodes = 146; // Max nodes possible
+const maxNodes = 146;
 
-let nodes = [];
-
+let nodes = []; // [{ index, position, name, text, baseScale, isNexus }]
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true
-});
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Initiate FlyControls with various params
+// Controls
 const controls = new FlyControls(camera, renderer.domElement);
 controls.movementSpeed = 10;
 controls.rollSpeed = Math.PI / 4;
 controls.autoForward = false;
 controls.dragToLook = true;
 
-// Load a font and create the text mesh
+// Font / text
 let font;
 let textMeshes = [], spinningText = [];
 const loader = new FontLoader();
-loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json').then(data => {
-    font = data;
 
-    // Add initial text above the nexus node
-    const text = addText('Nexus', new THREE.Vector3(0, 1.5, 0), 0.4, true);
-    nodes.push([nexusNode, text, 'Nexus']);
-}).catch(err => {
-    console.error('Error loading font:', err);
-});
+// Shared materials / geometry
+const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
+const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+const nodeGeometry = new THREE.SphereGeometry(0.5); // base radius; nexus scales to 2x
+
+// Instanced mesh for all nodes
+const nodeIMesh = new THREE.InstancedMesh(nodeGeometry, nodeMaterial, maxNodes);
+nodeIMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+scene.add(nodeIMesh);
+
+// Connections and line labels keyed by "i-j"
+let nodeConnections = {};  // { index: Set<index> }
+let lines = [];
+let lineTexts = {};        // { "i-j": TextMesh }
+
 function addText(text, position, size = 0.4, spinning = false) {
-    if (!font) return; // Font not loaded yet
-    const textGeometry = new TextGeometry(text, {
-        font: font,
-        size: size,
-        depth: 0.1,
-        curveSegments: 2
-    });
+    if (!font) return;
+    const textGeometry = new TextGeometry(text, { font, size, depth: 0.1, curveSegments: 2 });
     textGeometry.center();
-
     const textMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
     const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-
     textMeshes.push(textMesh);
     if (spinning) spinningText.push(textMesh);
-
-    // Position the text above the sphere
-    textMesh.position.x = position.x;
-    textMesh.position.y = position.y;
-    textMesh.position.z = position.z;
+    textMesh.position.copy(position);
     scene.add(textMesh);
     return textMesh;
 }
 
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
-
-let lines = [];
 function addLine(start, end) {
-    const points = [];
-    points.push(start);
-    points.push(end);
-    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), lineMaterial);
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([start.clone(), end.clone()]), lineMaterial);
     lines.push(line);
     scene.add(line);
     return line;
 }
 
-// Create the base (nexus) node
-const geometry = new THREE.SphereGeometry(1);
-const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
-const nexusNode = new THREE.Mesh(geometry, nodeMaterial);
-scene.add(nexusNode);
-
-let nodeConnections = {}; // Track connections between nodes
-let lineTexts = {}; // Track line texts
-
-function connectNodes(nodeA, nodeB, text) {
-    if (!nodeConnections[nodeA.uuid]) nodeConnections[nodeA.uuid] = new Set();
-    if (!nodeConnections[nodeB.uuid]) nodeConnections[nodeB.uuid] = new Set();
-    nodeConnections[nodeA.uuid].add(nodeB.uuid);
-    nodeConnections[nodeB.uuid].add(nodeA.uuid);
-
-    const key = [nodeA.uuid, nodeB.uuid].sort().join('-');
-    const mid = new THREE.Vector3().addVectors(nodeA.position, nodeB.position).multiplyScalar(0.5);
-    lineTexts[key] = addText(text, new THREE.Vector3(mid.x, mid.y + 0.5, mid.z), 0.2);
-
-    addLine(nodeA.position, nodeB.position);
+function keyFor(a, b) {
+    return a < b ? `${a}-${b}` : `${b}-${a}`;
 }
 
-function addNode(position, originNode, name, connectionText = "Line") {
-    const geometry = new THREE.SphereGeometry(0.5);
-    const node = new THREE.Mesh(geometry, nodeMaterial);
-    node.position.copy(position);
-    scene.add(node);
-
-    connectNodes(originNode, node, connectionText);
-    nodes.push([node, addText(name, new THREE.Vector3(position.x, position.y + 1, position.z), 0.3), name]);
+function ensureConn(i) {
+    if (!nodeConnections[i]) nodeConnections[i] = new Set();
 }
 
-let loopCount = 0;
-function createLoop(nodeIndexA, nodeIndexB, connectionText = "Loop") {
-    const nodeA = nodes[nodeIndexA][0];
-    const nodeB = nodes[nodeIndexB][0];
-    if (nodeA !== nodeB && !nodeConnections[nodeA.uuid]?.has(nodeB.uuid)) {
-        connectNodes(nodeA, nodeB, connectionText);
-        loopCount++;
+function connectNodes(i, j, text) {
+    if (i === j) return;
+    ensureConn(i); ensureConn(j);
+    if (nodeConnections[i].has(j)) return;
+
+    nodeConnections[i].add(j);
+    nodeConnections[j].add(i);
+
+    const mid = new THREE.Vector3().addVectors(nodes[i].position, nodes[j].position).multiplyScalar(0.5);
+    const k = keyFor(i, j);
+    lineTexts[k] = addText(text, new THREE.Vector3(mid.x, mid.y + 0.5, mid.z), 0.2);
+}
+
+function updateLines() {
+    // Clear old
+    for (let line of lines) {
+        scene.remove(line);
+        line.geometry.dispose();
+        if (line.material.dispose) line.material.dispose();
+    }
+    lines = [];
+    // Recreate current
+    for (let i = 0; i < nodes.length; i++) {
+        const conns = nodeConnections[i];
+        if (!conns) continue;
+        for (const j of conns) {
+            if (i >= j) continue;
+            addLine(nodes[i].position, nodes[j].position);
+        }
     }
 }
 
-// Helper: returns remaining target names/verbs for a given node index
+function updateLineTexts() {
+    for (const k in lineTexts) {
+        const [a, b] = k.split('-').map(Number);
+        if (!nodes[a] || !nodes[b]) continue;
+        const mid = new THREE.Vector3().addVectors(nodes[a].position, nodes[b].position).multiplyScalar(0.5);
+        const textMesh = lineTexts[k];
+        textMesh.position.set(mid.x, mid.y + 0.5, mid.z);
+    }
+}
+
+// Instance transforms
+const _q = new THREE.Quaternion();
+function commitInstance(i, pulseMul = 1) {
+    const rec = nodes[i];
+    const s = rec.baseScale * pulseMul;
+    const scale = new THREE.Vector3(s, s, s);
+    const m = new THREE.Matrix4().compose(rec.position, _q, scale);
+    nodeIMesh.setMatrixAt(i, m);
+}
+
+function commitAll(pulseMul = 1) {
+    for (let i = 0; i < nodes.length; i++) commitInstance(i, pulseMul);
+    nodeIMesh.count = nodes.length;
+    nodeIMesh.instanceMatrix.needsUpdate = true;
+}
+
+// Node creation
+function addInstance(position, name, isNexus = false) {
+    const index = nodes.length;
+    const baseScale = isNexus ? 2.0 : 1.0; // base geometry is 0.5 -> nexus looks like radius 1
+    const rec = {
+        index,
+        position: position.clone(),
+        name,
+        baseScale,
+        isNexus,
+        text: addText(name, new THREE.Vector3(position.x, position.y + (isNexus ? 1.5 : 1), position.z), 0.3)
+    };
+    nodes.push(rec);
+    commitInstance(index);
+    nodeIMesh.count = nodes.length;
+    nodeIMesh.instanceMatrix.needsUpdate = true;
+
+    if (isNexus) spinningText.push(rec.text); // Nexus text spins
+
+    return index;
+}
+
+function addNode(position, originIndex, name, connectionText = 'Line') {
+    const idx = addInstance(position, name, false);
+    connectNodes(originIndex, idx, connectionText);
+    return idx;
+}
+
+// Loops and generation
+let loopCount = 0;
+function createLoop(nodeIndexA, nodeIndexB, connectionText = 'Loop') {
+    ensureConn(nodeIndexA); ensureConn(nodeIndexB);
+    if (nodeConnections[nodeIndexA]?.has(nodeIndexB)) return;
+    connectNodes(nodeIndexA, nodeIndexB, connectionText);
+    loopCount++;
+}
+
+// Remaining targets for a node index
 function remainingTargetsFor(nodeIndex) {
-    const [baseNode, , baseName] = nodes[nodeIndex];
+    const baseName = nodes[nodeIndex].name;
     const allowed = NODE_CONNECTIONS[baseName] || [];
     const verbs = NODE_VERBS[baseName] || [];
-
-    // Build a set of names already connected from this base node
     const connectedNames = new Set(
-        [...(nodeConnections[baseNode.uuid] || new Set())]
-            .map(uuid => nodes.find(n => n[0].uuid === uuid))
-            .filter(Boolean)
-            .map(n => n[2])
+        [...(nodeConnections[nodeIndex] || new Set())].map(j => nodes[j].name)
     );
-
     const remaining = [];
     const remainingVerbs = [];
     for (let i = 0; i < allowed.length; i++) {
-        const targetName = allowed[i];
-        if (connectedNames.has(targetName)) continue;
-        remaining.push(targetName);
+        const t = allowed[i];
+        if (connectedNames.has(t)) continue;
+        remaining.push(t);
         remainingVerbs.push(verbs[i]);
-    } return { baseNode, remaining, remainingVerbs };
+    }
+    return { remaining, remainingVerbs };
 }
 
 function addSmartNode() {
     if (nodes.length === 0) return false;
 
-    // Pick the first node that still has unfulfilled connections
-    let possiblePicks = [];
+    // Collect candidates that still have available targets
+    const candidates = [];
     for (let i = 0; i < nodes.length; i++) {
         const info = remainingTargetsFor(i);
-        if (info.remaining.length === 0) continue;
-        possiblePicks.push(info.remaining);
+        if (info.remaining.length > 0) candidates.push({ baseIndex: i, ...info });
     }
-    if (possiblePicks.length === 0) return false; // nothing left to connect
-    const pickIndex = Math.floor(Math.random() * possiblePicks.length); // Randomly pick a possible node
+    if (candidates.length === 0) return false;
 
-    const { baseNode, remaining, remainingVerbs } = remainingTargetsFor(pickIndex);
+    // Pick a random base among candidates
+    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    const { baseIndex, remaining, remainingVerbs } = pick;
+
     const k = Math.floor(Math.random() * remaining.length);
     const newName = remaining[k];
     const newVerb = remainingVerbs[k];
 
-    // If the target already exists globally, make a loop from the actual base
-    const existingIndex = nodes.findIndex(n => n[2] === newName);
+    const existingIndex = nodes.findIndex(n => n.name === newName);
     if (existingIndex !== -1) {
-        createLoop(pickIndex, existingIndex, newVerb);
+        createLoop(baseIndex, existingIndex, newVerb);
         return true;
     }
 
-    // Otherwise create a new node
+    // Create new node around base
+    const basePos = nodes[baseIndex].position;
     const angle = 2 * Math.PI * Math.random();
     const radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
     const newPosition = new THREE.Vector3(
-        baseNode.position.x + Math.cos(angle) * radius,
-        baseNode.position.y + Math.random() - 0.5,
-        baseNode.position.z + Math.sin(angle) * radius
+        basePos.x + Math.cos(angle) * radius,
+        basePos.y + Math.random() - 0.5,
+        basePos.z + Math.sin(angle) * radius
     );
-    addNode(newPosition, baseNode, newName, newVerb);
+    addNode(newPosition, baseIndex, newName, newVerb);
     return true;
 }
 
+// Camera
 camera.position.z = 5;
 
-// Set up bloom composer
+// Bloom
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(
@@ -390,9 +434,8 @@ const bloomPass = new UnrealBloomPass(
 );
 composer.addPass(bloomPass);
 
+// Influence and UI
 let influence = 0;
-
-// Optionally, create a simple score display
 const influenceDiv = document.createElement('div');
 influenceDiv.style.position = 'absolute';
 influenceDiv.style.top = '10px';
@@ -403,7 +446,6 @@ influenceDiv.style.fontFamily = 'sans-serif';
 influenceDiv.textContent = `Influence: ${influence}`;
 document.body.appendChild(influenceDiv);
 
-// Nexus node pulsing effect
 let pulsing = false;
 let pulsingTime = 0;
 const pulsingDuration = 0.2; // seconds
@@ -414,31 +456,23 @@ function genInfluence() {
     for (let i = 0; i < loopCount; i++) mul *= 2; // Each loop doubles the influence gain
     influence += nodes.length * mul;
     influenceDiv.textContent = `Influence: ${influence}`;
-
-    // Start pulsing effect
     pulsing = true;
     pulsingTime = 0;
 }
 
-// Clicked on screen
-renderer.domElement.addEventListener('click', () => {
-    genInfluence();
-});
+renderer.domElement.addEventListener('click', () => genInfluence());
 
-// CLicked spacer
 let canGenerate = true;
 window.addEventListener('keydown', (event) => {
-    if (event.code === 'Space' && canGenerate) {
-        genInfluence();
-        canGenerate = false; // 300ms delay
-        setTimeout(() => { canGenerate = true; }, 300);
-    }
+    if (!(event.code === 'Space' && canGenerate)) return;
+    genInfluence();
+    canGenerate = false;
+    setTimeout(() => { canGenerate = true; }, 300);
 });
 
 let nodePrice = START_PRICE; // Price of adding a node
 let additionCount = 1;
 
-// Button to add nodes and lines for testing
 const addButton = document.createElement('button');
 addButton.style.position = 'absolute';
 addButton.style.top = '50px';
@@ -446,102 +480,80 @@ addButton.style.left = '10px';
 addButton.textContent = `Connect (Cost: ${nodePrice})`;
 document.body.appendChild(addButton);
 addButton.addEventListener('click', () => {
-    if (influence < Math.ceil(nodePrice)) return; // Not enough influence to add a node
-    if (!addSmartNode()) return; // No valid connections could be made
+    if (influence < Math.ceil(nodePrice)) return;
+    if (!addSmartNode()) return;
     influence -= Math.ceil(nodePrice);
     additionCount++;
     let a = additionCount / maxNodes;
     a = a > 1 ? 1 : a;
-    nodePrice = a * a * a * (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE; // Increase price for next node
+    nodePrice = a * a * a * (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE;
     addButton.textContent = `Connect (Cost: ${Math.ceil(nodePrice)})`;
     influenceDiv.textContent = `Influence: ${influence}`;
 });
 
-function updateLines() {
-    // Erase all previous lines
-    for (let line of lines) {
-        scene.remove(line);
-        line.geometry.dispose();
-        if (line.material.dispose) line.material.dispose();
-    } lines = [];
-
-    // Recreate lines based on current connections
-    for (const [node, , , ] of nodes) {
-        const connections = nodeConnections[node.uuid];
-        if (!connections) continue;
-        for (const otherUuid of connections) {
-            const otherNode = nodes.find(n => n[0].uuid === otherUuid)?.[0];
-            if (!otherNode || node.uuid >= otherNode.uuid) continue; // Avoid duplicates using ordered uuids
-            const line = addLine(node.position, otherNode.position);
-            lines.push(line);
-        }
-    }
+// Lines updates once per frame
+function rebuildLinesAndTexts() {
+    updateLines();
+    updateLineTexts();
 }
 
-function updateLineTexts() {
-    for (const key in lineTexts) {
-        const [uuidA, uuidB] = key.split('-');
-        let nodeA, nodeB;
-        for (let [node, _] of nodes) {
-            if (node.uuid === uuidA) nodeA = node;
-            else if (node.uuid === uuidB) nodeB = node;
-            if (nodeA && nodeB) break;
-        } if (!nodeA || !nodeB) continue;
-        const textMesh = lineTexts[key];
-        textMesh.position.x = (nodeA.position.x + nodeB.position.x) / 2;
-        textMesh.position.y = (nodeA.position.y + nodeB.position.y) / 2 + 0.5;
-        textMesh.position.z = (nodeA.position.z + nodeB.position.z) / 2;
-    }
-}
-
+// Animate
 function animate() {
-    const deltaTime = 1 / 60; // Fixed timestep for consistency
+    const deltaTime = 1 / 60;
 
-    // Rotate spinning text
-    for (let textMesh of spinningText) textMesh.rotation.y += deltaTime;
+    for (let t of spinningText) t.rotation.y += deltaTime;
 
-    // Handle pulsing effect
+    // Pulse scale multiplier
+    let pulseMul = 1;
     if (pulsing) {
         pulsingTime += deltaTime;
         if (pulsingTime < pulsingDuration) {
-            const scale = 1 + Math.sin(2 * Math.PI * pulsingTime / pulsingDuration) * pulsingStrength;
-            for (let node of nodes) node[0].scale.set(scale, scale, scale);
-        } else pulsing = false;
-    }
-
-    // Adjust positions so nodes are properly spaced
-    for (let i = 0; i < nodes.length; i++) {
-        const [node, text, _] = nodes[i];
-        for (let j = i + 1; j < nodes.length; j++) {
-            const [otherNode, _, __] = nodes[j];
-            if (node === otherNode) continue;
-            const distance = node.position.distanceTo(otherNode.position);
-            const connected = nodeConnections[node.uuid]?.has(otherNode.uuid);
-            if (distance < MIN_NODE_DISTANCE) { // Push apart
-                const direction = new THREE.Vector3().subVectors(node.position, otherNode.position).normalize();
-                const moveDistance = (MIN_NODE_DISTANCE - distance) * deltaTime / 2;
-                node.position.addScaledVector(direction, moveDistance);
-                otherNode.position.addScaledVector(direction, -moveDistance);
-            } else if (distance > MAX_NODE_DISTANCE && connected) { // Only pull together connected nodes
-                const direction = new THREE.Vector3().subVectors(otherNode.position, node.position).normalize();
-                const moveDistance = (distance - MAX_NODE_DISTANCE) * deltaTime / 2;
-                node.position.addScaledVector(direction, moveDistance);
-                otherNode.position.addScaledVector(direction, -moveDistance);
-            }
-
-            if (!connected) continue; // Check if nodes are connected before updating lines
-            updateLines();
+            pulseMul = 1 + Math.sin(2 * Math.PI * pulsingTime / pulsingDuration) * pulsingStrength;
+        } else {
+            pulsing = false;
         }
-
-        // Move text to follow node
-        // The other nodes are automatically handled once we get
-        // to them so there's no worries about them
-        text.position.x = node.position.x;
-        text.position.y = node.position.y + (node === nexusNode ? 1.5 : 1); // The nexus node is slightly bigger
-        text.position.z = node.position.z;
     }
 
-    updateLineTexts();
+    // Physics-like spacing and spring on connections
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            const ni = nodes[i], nj = nodes[j];
+            const distance = ni.position.distanceTo(nj.position);
+            const connected = nodeConnections[i]?.has(j);
+
+            if (distance < MIN_NODE_DISTANCE) {
+                const dir = new THREE.Vector3().subVectors(ni.position, nj.position).normalize();
+                const move = (MIN_NODE_DISTANCE - distance) * deltaTime / 2;
+                ni.position.addScaledVector(dir, move);
+                nj.position.addScaledVector(dir, -move);
+            } else if (distance > MAX_NODE_DISTANCE && connected) {
+                const dir = new THREE.Vector3().subVectors(nj.position, ni.position).normalize();
+                const move = (distance - MAX_NODE_DISTANCE) * deltaTime / 2;
+                ni.position.addScaledVector(dir, move);
+                nj.position.addScaledVector(dir, -move);
+            }
+        }
+    }
+
+    // Update instance transforms and labels
+    commitAll(pulseMul);
+    for (let i = 0; i < nodes.length; i++) {
+        const rec = nodes[i];
+        if (rec.text) {
+            rec.text.position.set(rec.position.x, rec.position.y + (rec.isNexus ? 1.5 : 1), rec.position.z);
+        }
+    }
+
+    rebuildLinesAndTexts();
     controls.update(deltaTime);
     composer.render(deltaTime);
-} renderer.setAnimationLoop(animate);
+}
+renderer.setAnimationLoop(animate);
+
+// Load font and seed first node (Nexus)
+loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json')
+    .then(data => {
+        font = data;
+        addInstance(new THREE.Vector3(0, 0, 0), 'Nexus', true);
+    })
+    .catch(err => console.error('Error loading font:', err));
