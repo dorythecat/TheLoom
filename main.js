@@ -349,8 +349,8 @@ function commitAll(pulseMul = 1) {
 function addInstance(position, name) {
     const isNexus = name === 'Nexus';
     const index = nodes.length;
-    const baseScale = isNexus ? 2.0 : 1.0; // base geometry is 0.5 -> nexus looks like radius 1
-    const rec = {
+    const baseScale = isNexus ? 2 : 1; // base geometry is 0.5 -> nexus looks like radius 1
+    const newNode = {
         index,
         position: position.clone(),
         name,
@@ -358,12 +358,12 @@ function addInstance(position, name) {
         isNexus,
         text: addText(name, new THREE.Vector3(position.x, position.y + (isNexus ? 1.5 : 1), position.z), 0.3)
     };
-    nodes.push(rec);
+    nodes.push(newNode);
     commitInstance(index);
-    nodeIMesh.count = nodes.length;
+    nodeIMesh.count = index + 1;
     nodeIMesh.instanceMatrix.needsUpdate = true;
 
-    if (isNexus) spinningText.push(rec.text); // Nexus text spins
+    if (isNexus) spinningText.push(newNode.text); // Nexus text spins
 
     return index;
 }
@@ -371,7 +371,7 @@ function addInstance(position, name) {
 function addNode(position, originIndex, name, connectionText) {
     connectNodes(originIndex, addInstance(position, name), connectionText);
     camera.position.set(position.x, position.y, position.z + 2);
-    camera.lookAt(position.x, position.y, position.z + 2);
+    camera.lookAt(position);
 }
 
 // Loops and generation
