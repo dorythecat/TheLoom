@@ -346,7 +346,8 @@ function commitAll(pulseMul = 1) {
 }
 
 // Node creation
-function addInstance(position, name, isNexus = false) {
+function addInstance(position, name) {
+    const isNexus = name === 'Nexus';
     const index = nodes.length;
     const baseScale = isNexus ? 2.0 : 1.0; // base geometry is 0.5 -> nexus looks like radius 1
     const rec = {
@@ -561,5 +562,5 @@ renderer.setAnimationLoop(animate);
 loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json')
     .then(data => {
         font = data;
-        addInstance(new THREE.Vector3(), 'Nexus', true);
+        addInstance(new THREE.Vector3(), 'Nexus');
     }).catch(err => console.error('Error loading font:', err));
