@@ -233,6 +233,7 @@ const nodeGeometry = new THREE.SphereGeometry(0.5); // base radius; nexus scales
 // Instanced mesh for all nodes
 const nodeIMesh = new THREE.InstancedMesh(nodeGeometry, nodeMaterial, maxNodes);
 nodeIMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+nodeIMesh.frustumCulled = false; // Prevent disappearing when too close
 scene.add(nodeIMesh);
 
 // Connections and line labels keyed by "i-j"
