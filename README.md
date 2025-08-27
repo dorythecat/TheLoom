@@ -8,3 +8,6 @@ A game about weaving strange looms...
 `Left-Right arrows`: Rotate camera.
 `Up-Down arrows`: Tilt camera.
 `Q-E`: Roll camera.
+You can also click drag to move the camera.
+
+Click on the screen or press the spacer to generate influence.
