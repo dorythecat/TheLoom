@@ -256,11 +256,11 @@ const loader = new FontLoader();
 
 // Shared materials / geometry
 const lineMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
-const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+const baseMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
 const nodeGeometry = new THREE.SphereGeometry(0.5); // base radius; nexus scales to 2x
 
 // Instanced mesh for all nodes
-const nodeIMesh = new THREE.InstancedMesh(nodeGeometry, nodeMaterial, maxNodes);
+const nodeIMesh = new THREE.InstancedMesh(nodeGeometry, baseMaterial, maxNodes);
 nodeIMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 nodeIMesh.frustumCulled = false; // Prevent disappearing when too close
 scene.add(nodeIMesh);
@@ -274,8 +274,7 @@ function addText(text, position, size = 0.4, spinning = false) {
     if (!font) return;
     const textGeometry = new TextGeometry(text, { font, size, depth: 0.1, curveSegments: 2 });
     textGeometry.center();
-    const textMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
-    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    const textMesh = new THREE.Mesh(textGeometry, baseMaterial);
     textMeshes.push(textMesh);
     if (spinning) spinningText.push(textMesh);
     textMesh.position.copy(position);
