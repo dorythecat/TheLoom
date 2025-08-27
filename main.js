@@ -13,7 +13,7 @@ const MAX_NODE_DISTANCE = 5;
 const START_PRICE = 10;
 const MAX_PRICE = 100000;
 
-let NODE_CONNECTIONS = { // List of possible node connections
+const NODE_CONNECTIONS = { // List of possible node connections
     "Nexus": ["Life", "Knowledge", "Power"],
 
     // From Nexus
@@ -108,7 +108,7 @@ let NODE_CONNECTIONS = { // List of possible node connections
     "Water": ["Ice"]
 }
 
-let NODE_VERBS = { // List of possible node verbs
+const NODE_VERBS = { // List of possible node verbs
     "Nexus": ["", "", ""],
 
     // From Nexus
@@ -316,43 +316,65 @@ function createLoop(nodeIndexA, nodeIndexB, connectionText = "Loop") {
     }
 }
 
-// Add a node with names and connections handled
-function addSmartNode() { // Return a boolean indicating whether a new connection was made or not
-    if (nodes.length === 0) return false; // No nodes to base off of
-    let [lastNode, _, lastName] = nodes[nodes.length - 1];
+// Helper: returns remaining target names/verbs for a given node index
+function remainingTargetsFor(nodeIndex) {
+    const [baseNode, , baseName] = nodes[nodeIndex];
+    const allowed = NODE_CONNECTIONS[baseName] || [];
+    const verbs = NODE_VERBS[baseName] || [];
 
-    let possibleNames = NODE_CONNECTIONS[lastName] || [];
-    let offset = 2;
-    while (possibleNames.length === 0) {
-        if (offset >= nodes.length) return false; // No valid nodes to base off of
-        [lastNode, _, lastName] = nodes[nodes.length - offset++];
+    // Build a set of names already connected from this base node
+    const connectedNames = new Set(
+        [...(nodeConnections[baseNode.uuid] || new Set())]
+            .map(uuid => nodes.find(n => n[0].uuid === uuid))
+            .filter(Boolean)
+            .map(n => n[2])
+    );
 
-        possibleNames = NODE_CONNECTIONS[lastName] || [];
+    const remaining = [];
+    const remainingVerbs = [];
+    for (let i = 0; i < allowed.length; i++) {
+        const targetName = allowed[i];
+        if (connectedNames.has(targetName)) continue;
+        remaining.push(targetName);
+        remainingVerbs.push(verbs[i]);
+    } return { baseNode, remaining, remainingVerbs };
+}
+
+function addSmartNode() {
+    if (nodes.length === 0) return false;
+
+    // Pick the first node that still has unfulfilled connections
+    let baseIndex = -1, pick = null;
+    for (let i = 0; i < nodes.length; i++) {
+        const info = remainingTargetsFor(i);
+        if (info.remaining.length <= 0) continue;
+        baseIndex = i;
+        pick = info;
+        break;
     }
-    const possibleVerbs = NODE_VERBS[lastName];
+    if (!pick) return false; // nothing left to connect
 
-    let newIndex = Math.floor(Math.random() * possibleNames.length);
-    let newName = possibleNames[newIndex];
-    let newVerb = possibleVerbs[newIndex];
+    const { baseNode, remaining, remainingVerbs } = pick;
+    const k = Math.floor(Math.random() * remaining.length);
+    const newName = remaining[k];
+    const newVerb = remainingVerbs[k];
 
-    NODE_CONNECTIONS[lastName].splice(newIndex, 1);
-    NODE_VERBS[lastName].splice(newIndex, 1);
-
-    // Check if a node with this name already exists, and loop to it if so
+    // If the target already exists globally, make a loop from the actual base
     const existingIndex = nodes.findIndex(n => n[2] === newName);
     if (existingIndex !== -1) {
-        createLoop(nodes.length - 1, existingIndex, newVerb);
+        createLoop(baseIndex, existingIndex, newVerb);
         return true;
     }
 
-    let angle = 2 * Math.PI * Math.random();
-    let radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
-    let newPosition = new THREE.Vector3(
-        lastNode.position.x + Math.cos(angle) * radius,
-        lastNode.position.y + Math.random() - 0.5, // Slight vertical variation
-        lastNode.position.z + Math.sin(angle) * radius
+    // Otherwise create a new node
+    const angle = 2 * Math.PI * Math.random();
+    const radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
+    const newPosition = new THREE.Vector3(
+        baseNode.position.x + Math.cos(angle) * radius,
+        baseNode.position.y + Math.random() - 0.5,
+        baseNode.position.z + Math.sin(angle) * radius
     );
-    addNode(newPosition, lastNode, newName, newVerb);
+    addNode(newPosition, baseNode, newName, newVerb);
     return true;
 }
 
