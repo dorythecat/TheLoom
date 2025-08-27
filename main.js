@@ -472,8 +472,7 @@ const pulsingDuration = 0.2; // seconds
 const pulsingStrength = 0.1;
 
 function genInfluence() {
-    let mul = 1;
-    for (let i = 0; i < loopCount; i++) mul *= 2; // Each loop doubles the influence gain
+    let mul = 1 << loopCount; // Each loop doubles the influence gain
     influence += nodes.length * mul;
     influenceDiv.textContent = `Influence: ${influence}`;
     pulsing = true;
@@ -484,7 +483,7 @@ renderer.domElement.addEventListener('click', () => genInfluence());
 
 let canGenerate = true;
 window.addEventListener('keydown', (event) => {
-    if (!(event.code === 'Space' && canGenerate)) return;
+    if (event.code !== 'Space' || !canGenerate) return;
     genInfluence();
     canGenerate = false;
     setTimeout(() => { canGenerate = true; }, 300);
