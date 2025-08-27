@@ -367,6 +367,21 @@ function addInstance(position, name, isNexus = false) {
     return index;
 }
 
+function addNode(position, originIndex, name, connectionText) {
+    connectNodes(originIndex, addInstance(position, name), connectionText);
+    camera.position.set(position.x, position.y, position.z + 2);
+    camera.lookAt(position.x, position.y, position.z + 2);
+}
+
+// Loops and generation
+let loopCount = 0;
+function createLoop(nodeIndexA, nodeIndexB, connectionText) {
+    ensureConn(nodeIndexA); ensureConn(nodeIndexB);
+    if (nodeConnections[nodeIndexA]?.has(nodeIndexB)) return;
+    connectNodes(nodeIndexA, nodeIndexB, connectionText);
+    loopCount++;
+}
+
 // Remaining targets for a node index
 function remainingTargetsFor(nodeIndex) {
     const baseName = nodes[nodeIndex].name;
@@ -385,7 +400,6 @@ function remainingTargetsFor(nodeIndex) {
     } return { remaining, remainingVerbs };
 }
 
-let loops = 0; // Loop counter
 function addSmartNode() {
     if (nodes.length === 0) return false;
 
@@ -405,11 +419,8 @@ function addSmartNode() {
     const newVerb = remainingVerbs[k];
 
     const existingIndex = nodes.findIndex(n => n.name === newName);
-    if (existingIndex !== -1) { // Connect to existing node
-        ensureConn(baseIndex); ensureConn(existingIndex);
-        if (nodeConnections[baseIndex]?.has(existingIndex)) return;
-        connectNodes(baseIndex, existingIndex, newVerb);
-        loops++;
+    if (existingIndex !== -1) {
+        createLoop(baseIndex, existingIndex, newVerb);
         return true;
     }
 
@@ -422,12 +433,7 @@ function addSmartNode() {
         Math.random() - 0.5,
         Math.sin(angle) * radius
     ));
-
-    // Add node
-    connectNodes(k, addInstance(newPosition, newName), newVerb);
-    camera.position.set(newPosition.x, newPosition.y, newPosition.z + 2);
-    camera.lookAt(newPosition.x, newPosition.y, newPosition.z + 2);
-
+    addNode(newPosition, baseIndex, newName, newVerb);
     return true;
 }
 
@@ -462,7 +468,7 @@ const pulsingDuration = 0.2; // seconds
 const pulsingStrength = 0.1;
 
 function genInfluence() {
-    let mul = 1 << loops; // Each loop doubles the influence gain
+    let mul = 1 << loopCount; // Each loop doubles the influence gain
     influence += nodes.length * mul;
     influenceDiv.textContent = `Influence: ${influence}`;
     pulsing = true;
