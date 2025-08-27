@@ -367,15 +367,6 @@ function addInstance(position, name, isNexus = false) {
     return index;
 }
 
-// Loops and generation
-let loopCount = 0;
-function createLoop(nodeIndexA, nodeIndexB, connectionText) {
-    ensureConn(nodeIndexA); ensureConn(nodeIndexB);
-    if (nodeConnections[nodeIndexA]?.has(nodeIndexB)) return;
-    connectNodes(nodeIndexA, nodeIndexB, connectionText);
-    loopCount++;
-}
-
 // Remaining targets for a node index
 function remainingTargetsFor(nodeIndex) {
     const baseName = nodes[nodeIndex].name;
@@ -394,6 +385,7 @@ function remainingTargetsFor(nodeIndex) {
     } return { remaining, remainingVerbs };
 }
 
+let loops = 0; // Loop counter
 function addSmartNode() {
     if (nodes.length === 0) return false;
 
@@ -413,8 +405,11 @@ function addSmartNode() {
     const newVerb = remainingVerbs[k];
 
     const existingIndex = nodes.findIndex(n => n.name === newName);
-    if (existingIndex !== -1) {
-        createLoop(baseIndex, existingIndex, newVerb);
+    if (existingIndex !== -1) { // Connect to existing node
+        ensureConn(baseIndex); ensureConn(existingIndex);
+        if (nodeConnections[baseIndex]?.has(existingIndex)) return;
+        connectNodes(baseIndex, existingIndex, newVerb);
+        loops++;
         return true;
     }
 
@@ -467,7 +462,7 @@ const pulsingDuration = 0.2; // seconds
 const pulsingStrength = 0.1;
 
 function genInfluence() {
-    let mul = 1 << loopCount; // Each loop doubles the influence gain
+    let mul = 1 << loops; // Each loop doubles the influence gain
     influence += nodes.length * mul;
     influenceDiv.textContent = `Influence: ${influence}`;
     pulsing = true;
