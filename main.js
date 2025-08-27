@@ -101,11 +101,23 @@ const NODE_CONNECTIONS = { // List of possible node connections
     // From Leaves
     "Photosynthesis": ["Oxygen", "Water", "Glucose", "Light"],
     "Shade": ["Coolness", "Shelter"],
-    "Decay": ["Compost", "Nutrients", "Soil", "Death"],
+    "Decay": ["Compost", "Nutrients", "Death"],
+
+    // From Photosynthesis
+    "Oxygen": ["Life"],
+    "Glucose": ["Energy"],
+
+    // From Shade
+    "Shelter": ["Protection", "Safety"],
+    "Coolness": ["Comfort", "Relief"],
+
+    // From Decay
+    "Compost": ["Fertilizer", "Soil"],
+    "Nutrients": ["Growth", "Health"],
+    "Death": ["Life"],
 
     // Miscellaneous connections
-    "Death": ["Life"],
-    "Water": ["Ice"]
+    "Water": ["Ice", "Coolness"]
 }
 
 const NODE_VERBS = { // List of possible node verbs
@@ -198,12 +210,29 @@ const NODE_VERBS = { // List of possible node verbs
     "Shade": ["provides", "offers"],
     "Decay": ["creates", "returns", "enriches", "is"],
 
+    // From Photosynthesis
+    "Oxygen": ["sustains"],
+    "Glucose": ["provides"],
+
+    // From Shade
+    "Shelter": ["offers", "provides"],
+    "Coolness": ["brings", "offers"],
+
+    // From Decay
+    "Compost": ["creates", "improves"],
+    "Nutrients": ["support", "improve"],
+    "Death": ["enables"],
+
     // Miscellaneous connections
-    "Death": ["ends"],
-    "Water": ["freezes into"]
+    "Water": ["freezes into", "provides"]
 }
 
-const maxNodes = 146;
+let maxNodes= 0;
+for (const key in NODE_CONNECTIONS) {
+    maxNodes += NODE_CONNECTIONS[key].length;
+}
+maxNodes -= NODE_CONNECTIONS["Nexus"].length; // Nexus is not a node itself
+maxNodes -= 3; // IDK where this comes from but this is what makes it work soooooo
 
 let nodes = []; // [{ index, position, name, text, baseScale, isNexus }]
 const scene = new THREE.Scene();
