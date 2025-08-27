@@ -203,6 +203,8 @@ let NODE_VERBS = { // List of possible node verbs
     "Water": ["freezes into"]
 }
 
+const maxNodes = 146; // Max nodes possible
+
 let nodes = [];
 
 const scene = new THREE.Scene();
@@ -427,7 +429,7 @@ addButton.addEventListener('click', () => {
     if (!addSmartNode()) return; // No valid connections could be made
     influence -= Math.ceil(nodePrice);
     additionCount++;
-    let a = additionCount / Object.keys(NODE_CONNECTIONS).length;
+    let a = additionCount / maxNodes;
     a = a > 1 ? 1 : a;
     nodePrice = a * a * a * (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE; // Increase price for next node
     addButton.textContent = `Connect (Cost: ${Math.ceil(nodePrice)})`;
