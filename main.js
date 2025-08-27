@@ -499,16 +499,10 @@ addButton.addEventListener('click', () => {
     influence -= Math.ceil(nodePrice);
     additionCount++;
     let a = additionCount / maxNodes;
-    nodePrice = a * a * a * (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE; // Smoothstep
+    nodePrice = a * a * a *ebuildLinesAndTexts(); (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE; // Smoothstep
     addButton.textContent = `Connect (Cost: ${Math.ceil(nodePrice)})`;
     influenceDiv.textContent = `Influence: ${influence}`;
 });
-
-// Lines updates once per frame
-function rebuildLinesAndTexts() {
-    updateLines();
-    updateLineTexts();
-}
 
 // Animate
 function animate() {
@@ -550,7 +544,9 @@ function animate() {
     commitAll(pulseMul);
     for (let node of nodes) if (node.text) node.text.position.copy(node.position).y += node.isNexus ? 1.5 : 1;
 
-    rebuildLinesAndTexts();
+    updateLines();
+    updateLineTexts();
+
     controls.update(deltaTime);
     composer.render(deltaTime);
 }
