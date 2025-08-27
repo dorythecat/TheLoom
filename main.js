@@ -316,9 +316,9 @@ function updateLines() {
     lines = [];
     // Recreate current
     for (let i = 0; i < nodes.length; i++) {
-        const conns = nodeConnections[i];
-        if (!conns) continue;
-        for (const j of conns) if (i < j) addLine(nodes[i].position, nodes[j].position);
+        const connections = nodeConnections[i];
+        if (!connections) continue;
+        for (const j of connections) if (i < j) addLine(nodes[i].position, nodes[j].position);
     }
 }
 
