@@ -424,9 +424,9 @@ function addSmartNode() {
     ));
 
     // Add node
-    connectNodes(originIndex, addInstance(position, name), connectionText);
-    camera.position.set(position.x, position.y, position.z + 2);
-    camera.lookAt(position.x, position.y, position.z + 2);
+    connectNodes(k, addInstance(newPosition, newName), newVerb);
+    camera.position.set(newPosition.x, newPosition.y, newPosition.z + 2);
+    camera.lookAt(newPosition.x, newPosition.y, newPosition.z + 2);
 
     return true;
 }
