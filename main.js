@@ -261,10 +261,6 @@ function addLine(start, end) {
     return line;
 }
 
-function keyFor(a, b) {
-    return a < b ? `${a}-${b}` : `${b}-${a}`;
-}
-
 function ensureConn(i) {
     if (!nodeConnections[i]) nodeConnections[i] = new Set();
 }
@@ -278,7 +274,7 @@ function connectNodes(i, j, text) {
     nodeConnections[j].add(i);
 
     const mid = new THREE.Vector3().addVectors(nodes[i].position, nodes[j].position).multiplyScalar(0.5);
-    const k = keyFor(i, j);
+    const k = i < j ? `${i}-${j}` : `${j}-${i}`;
     lineTexts[k] = addText(text, new THREE.Vector3(mid.x, mid.y + 0.5, mid.z), 0.2);
 }
 
@@ -294,10 +290,7 @@ function updateLines() {
     for (let i = 0; i < nodes.length; i++) {
         const conns = nodeConnections[i];
         if (!conns) continue;
-        for (const j of conns) {
-            if (i >= j) continue;
-            addLine(nodes[i].position, nodes[j].position);
-        }
+        for (const j of conns) if (i < j) addLine(nodes[i].position, nodes[j].position);
     }
 }
 
@@ -312,12 +305,11 @@ function updateLineTexts() {
 }
 
 // Instance transforms
-const _q = new THREE.Quaternion();
 function commitInstance(i, pulseMul = 1) {
     const rec = nodes[i];
     const s = rec.baseScale * pulseMul;
     const scale = new THREE.Vector3(s, s, s);
-    const m = new THREE.Matrix4().compose(rec.position, _q, scale);
+    const m = new THREE.Matrix4().compose(rec.position, new THREE.Quaternion(), scale);
     nodeIMesh.setMatrixAt(i, m);
 }
 
@@ -379,8 +371,7 @@ function remainingTargetsFor(nodeIndex) {
         if (connectedNames.has(t)) continue;
         remaining.push(t);
         remainingVerbs.push(verbs[i]);
-    }
-    return { remaining, remainingVerbs };
+    } return { remaining, remainingVerbs };
 }
 
 function addSmartNode() {
@@ -391,8 +382,7 @@ function addSmartNode() {
     for (let i = 0; i < nodes.length; i++) {
         const info = remainingTargetsFor(i);
         if (info.remaining.length > 0) candidates.push({ baseIndex: i, ...info });
-    }
-    if (candidates.length === 0) return false;
+    } if (candidates.length === 0) return false; // No more possible connections
 
     // Pick a random base among candidates
     const pick = candidates[Math.floor(Math.random() * candidates.length)];
@@ -510,9 +500,7 @@ function animate() {
         pulsingTime += deltaTime;
         if (pulsingTime < pulsingDuration) {
             pulseMul = 1 + Math.sin(2 * Math.PI * pulsingTime / pulsingDuration) * pulsingStrength;
-        } else {
-            pulsing = false;
-        }
+        } else pulsing = false;
     }
 
     // Physics-like spacing and spring on connections
@@ -540,9 +528,7 @@ function animate() {
     commitAll(pulseMul);
     for (let i = 0; i < nodes.length; i++) {
         const rec = nodes[i];
-        if (rec.text) {
-            rec.text.position.set(rec.position.x, rec.position.y + (rec.isNexus ? 1.5 : 1), rec.position.z);
-        }
+        if (rec.text) rec.text.position.set(rec.position.x, rec.position.y + (rec.isNexus ? 1.5 : 1), rec.position.z);
     }
 
     rebuildLinesAndTexts();
