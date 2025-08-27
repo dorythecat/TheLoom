@@ -373,6 +373,8 @@ function addInstance(position, name, isNexus = false) {
 function addNode(position, originIndex, name, connectionText = 'Line') {
     const idx = addInstance(position, name, false);
     connectNodes(originIndex, idx, connectionText);
+    camera.position.set(position.x, position.y, position.z + 2);
+    camera.lookAt(position.x, position.y, position.z + 2);
     return idx;
 }
 
