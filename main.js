@@ -344,17 +344,16 @@ function addSmartNode() {
     if (nodes.length === 0) return false;
 
     // Pick the first node that still has unfulfilled connections
-    let baseIndex = -1, pick = null;
+    let possiblePicks = [];
     for (let i = 0; i < nodes.length; i++) {
         const info = remainingTargetsFor(i);
-        if (info.remaining.length <= 0) continue;
-        baseIndex = i;
-        pick = info;
-        break;
+        if (info.remaining.length === 0) continue;
+        possiblePicks.push(info.remaining);
     }
-    if (!pick) return false; // nothing left to connect
+    if (possiblePicks.length === 0) return false; // nothing left to connect
+    const pickIndex = Math.floor(Math.random() * possiblePicks.length); // Randomly pick a possible node
 
-    const { baseNode, remaining, remainingVerbs } = pick;
+    const { baseNode, remaining, remainingVerbs } = remainingTargetsFor(pickIndex);
     const k = Math.floor(Math.random() * remaining.length);
     const newName = remaining[k];
     const newVerb = remainingVerbs[k];
@@ -362,7 +361,7 @@ function addSmartNode() {
     // If the target already exists globally, make a loop from the actual base
     const existingIndex = nodes.findIndex(n => n[2] === newName);
     if (existingIndex !== -1) {
-        createLoop(baseIndex, existingIndex, newVerb);
+        createLoop(pickIndex, existingIndex, newVerb);
         return true;
     }
 
