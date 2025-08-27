@@ -367,14 +367,6 @@ function addInstance(position, name, isNexus = false) {
     return index;
 }
 
-function addNode(position, originIndex, name, connectionText) {
-    const idx = addInstance(position, name);
-    connectNodes(originIndex, idx, connectionText);
-    camera.position.set(position.x, position.y, position.z + 2);
-    camera.lookAt(position.x, position.y, position.z + 2);
-    return idx;
-}
-
 // Loops and generation
 let loopCount = 0;
 function createLoop(nodeIndexA, nodeIndexB, connectionText) {
@@ -435,7 +427,12 @@ function addSmartNode() {
         Math.random() - 0.5,
         Math.sin(angle) * radius
     ));
-    addNode(newPosition, baseIndex, newName, newVerb);
+
+    // Add node
+    connectNodes(originIndex, addInstance(position, name), connectionText);
+    camera.position.set(position.x, position.y, position.z + 2);
+    camera.lookAt(position.x, position.y, position.z + 2);
+
     return true;
 }
 
