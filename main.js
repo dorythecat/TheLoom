@@ -367,8 +367,8 @@ function addInstance(position, name, isNexus = false) {
     return index;
 }
 
-function addNode(position, originIndex, name, connectionText = 'Line') {
-    const idx = addInstance(position, name, false);
+function addNode(position, originIndex, name, connectionText) {
+    const idx = addInstance(position, name);
     connectNodes(originIndex, idx, connectionText);
     camera.position.set(position.x, position.y, position.z + 2);
     camera.lookAt(position.x, position.y, position.z + 2);
@@ -377,7 +377,7 @@ function addNode(position, originIndex, name, connectionText = 'Line') {
 
 // Loops and generation
 let loopCount = 0;
-function createLoop(nodeIndexA, nodeIndexB, connectionText = 'Loop') {
+function createLoop(nodeIndexA, nodeIndexB, connectionText) {
     ensureConn(nodeIndexA); ensureConn(nodeIndexB);
     if (nodeConnections[nodeIndexA]?.has(nodeIndexB)) return;
     connectNodes(nodeIndexA, nodeIndexB, connectionText);
@@ -445,13 +445,12 @@ camera.position.z = 5;
 // Bloom
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloomPass = new UnrealBloomPass(
+composer.addPass(new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
     0.5, // strength
     2, // radius
     0.3 // threshold
-);
-composer.addPass(bloomPass);
+));
 
 // Influence and UI
 let influence = 0;
