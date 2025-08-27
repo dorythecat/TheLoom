@@ -302,8 +302,7 @@ function connectNodes(i, j, text) {
     nodeConnections[j].add(i);
 
     const mid = new THREE.Vector3().addVectors(nodes[i].position, nodes[j].position).multiplyScalar(0.5);
-    const k = i < j ? `${i}-${j}` : `${j}-${i}`;
-    lineTexts[k] = addText(text, new THREE.Vector3(mid.x, mid.y + 0.5, mid.z), 0.2);
+    lineTexts[i < j ? `${i}-${j}` : `${j}-${i}`] = addText(text, mid.add(0, 0.5, 0), 0.2);
 }
 
 function updateLines() {
@@ -327,8 +326,7 @@ function updateLineTexts() {
         const [a, b] = k.split('-').map(Number);
         if (!nodes[a] || !nodes[b]) continue;
         const mid = new THREE.Vector3().addVectors(nodes[a].position, nodes[b].position).multiplyScalar(0.5);
-        const textMesh = lineTexts[k];
-        textMesh.position.set(mid.x, mid.y + 0.5, mid.z);
+        lineTexts[k].position.set(mid.x, mid.y + 0.5, mid.z);
     }
 }
 
