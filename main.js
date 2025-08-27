@@ -505,8 +505,7 @@ addButton.addEventListener('click', () => {
     influence -= Math.ceil(nodePrice);
     additionCount++;
     let a = additionCount / maxNodes;
-    a = a > 1 ? 1 : a;
-    nodePrice = a * a * a * (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE;
+    nodePrice = a * a * a * (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE; // Smoothstep
     addButton.textContent = `Connect (Cost: ${Math.ceil(nodePrice)})`;
     influenceDiv.textContent = `Influence: ${influence}`;
 });
