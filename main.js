@@ -553,10 +553,7 @@ function animate() {
 
     // Update instance transforms and labels
     commitAll(pulseMul);
-    for (let i = 0; i < nodes.length; i++) {
-        const rec = nodes[i];
-        if (rec.text) rec.text.position.set(rec.position.x, rec.position.y + (rec.isNexus ? 1.5 : 1), rec.position.z);
-    }
+    for (let node of nodes) if (node.text) node.text.position.copy(node.position).y += node.isNexus ? 1.5 : 1;
 
     rebuildLinesAndTexts();
     controls.update(deltaTime);
@@ -569,5 +566,4 @@ loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regu
     .then(data => {
         font = data;
         addInstance(new THREE.Vector3(), 'Nexus', true);
-    })
-    .catch(err => console.error('Error loading font:', err));
+    }).catch(err => console.error('Error loading font:', err));
