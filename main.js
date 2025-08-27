@@ -431,11 +431,11 @@ function addSmartNode() {
     const basePos = nodes[baseIndex].position;
     const angle = 2 * Math.PI * Math.random();
     const radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
-    const newPosition = new THREE.Vector3(
-        basePos.x + Math.cos(angle) * radius,
-        basePos.y + Math.random() - 0.5,
-        basePos.z + Math.sin(angle) * radius
-    );
+    const newPosition = basePos.clone().add(new THREE.Vector3(
+        Math.cos(angle) * radius,
+        Math.random() - 0.5,
+        Math.sin(angle) * radius
+    ));
     addNode(newPosition, baseIndex, newName, newVerb);
     return true;
 }
@@ -533,21 +533,21 @@ function animate() {
 
     // Physics-like spacing and spring on connections
     for (let i = 0; i < nodes.length; i++) {
+        const ni = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
-            const ni = nodes[i], nj = nodes[j];
+            const nj = nodes[j];
             const distance = ni.position.distanceTo(nj.position);
-            const connected = nodeConnections[i]?.has(j);
 
             if (distance < MIN_NODE_DISTANCE) {
-                const dir = new THREE.Vector3().subVectors(ni.position, nj.position).normalize();
-                const move = (MIN_NODE_DISTANCE - distance) * deltaTime / 2;
-                ni.position.addScaledVector(dir, move);
-                nj.position.addScaledVector(dir, -move);
-            } else if (distance > MAX_NODE_DISTANCE && connected) {
-                const dir = new THREE.Vector3().subVectors(nj.position, ni.position).normalize();
-                const move = (distance - MAX_NODE_DISTANCE) * deltaTime / 2;
-                ni.position.addScaledVector(dir, move);
-                nj.position.addScaledVector(dir, -move);
+                const dir = new THREE.Vector3().copy(ni.position)
+                    .sub(nj.position).normalize().multiplyScalar((MIN_NODE_DISTANCE - distance) * deltaTime / 2);
+                ni.position.add(dir);
+                nj.position.add(dir.negate());
+            } else if (distance > MAX_NODE_DISTANCE && nodeConnections[i]?.has(j)) { // Only apply spring if connected
+                const dir = new THREE.Vector3().copy(nj.position)
+                    .sub(ni.position).normalize().multiplyScalar((distance - MAX_NODE_DISTANCE) * deltaTime / 2);
+                ni.position.add(dir);
+                nj.position.add(dir.negate());
             }
         }
     }
@@ -569,6 +569,6 @@ renderer.setAnimationLoop(animate);
 loader.loadAsync('https://unpkg.com/three@0.150.1/examples/fonts/helvetiker_regular.typeface.json')
     .then(data => {
         font = data;
-        addInstance(new THREE.Vector3(0, 0, 0), 'Nexus', true);
+        addInstance(new THREE.Vector3(), 'Nexus', true);
     })
     .catch(err => console.error('Error loading font:', err));
