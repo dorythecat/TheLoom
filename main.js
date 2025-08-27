@@ -426,15 +426,13 @@ function addSmartNode() {
     }
 
     // Create new node around base
-    const basePos = nodes[baseIndex].position;
     const angle = 2 * Math.PI * Math.random();
     const radius = MIN_NODE_DISTANCE + Math.random() * (MAX_NODE_DISTANCE - MIN_NODE_DISTANCE);
-    const newPosition = basePos.clone().add(new THREE.Vector3(
+    addNode(nodes[baseIndex].position.clone().add(new THREE.Vector3(
         Math.cos(angle) * radius,
         Math.random() - 0.5,
         Math.sin(angle) * radius
-    ));
-    addNode(newPosition, baseIndex, newName, newVerb);
+    )), baseIndex, newName, newVerb);
     return true;
 }
 
