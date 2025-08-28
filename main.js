@@ -500,6 +500,23 @@ connectButton.addEventListener('click', () => {
     influenceDiv.textContent = `Influence: ${influence}`;
 });
 
+let generatorPrice = 1000; // Price of adding a generator
+
+const generatorButton = document.createElement('button');
+generatorButton.style.position = 'absolute';
+generatorButton.style.top = '90px';
+generatorButton.style.left = '10px';
+generatorButton.textContent = `Add Generator (Cost: ${generatorPrice})`;
+document.body.appendChild(generatorButton);
+generatorButton.addEventListener('click', () => {
+    if (influence < generatorPrice) return;
+    influence -= generatorPrice;
+    generatorPrice *= 2;
+    generatorButton.textContent = `Add Auto-Clicker (Cost: ${generatorPrice})`;
+    influenceDiv.textContent = `Influence: ${influence}`;
+    setInterval(() => genInfluence(), 1000); // Add a generator
+});
+
 // Animate
 function animate() {
     const deltaTime = 1 / 60;
