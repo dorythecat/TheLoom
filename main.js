@@ -483,20 +483,20 @@ window.addEventListener('keydown', (event) => {
 let nodePrice = START_PRICE; // Price of adding a node
 let additionCount = 1;
 
-const addButton = document.createElement('button');
-addButton.style.position = 'absolute';
-addButton.style.top = '50px';
-addButton.style.left = '10px';
-addButton.textContent = `Connect (Cost: ${nodePrice})`;
-document.body.appendChild(addButton);
-addButton.addEventListener('click', () => {
+const connectButton = document.createElement('button');
+connectButton.style.position = 'absolute';
+connectButton.style.top = '50px';
+connectButton.style.left = '10px';
+connectButton.textContent = `Connect (Cost: ${nodePrice})`;
+document.body.appendChild(connectButton);
+connectButton.addEventListener('click', () => {
     if (influence < Math.ceil(nodePrice)) return;
     if (!addSmartNode()) return;
     influence -= Math.ceil(nodePrice);
     additionCount++;
     let a = additionCount / maxNodes;
     nodePrice = a * a * a * (4 - 3 * a) * (MAX_PRICE - START_PRICE) + START_PRICE; // Smoothstep
-    addButton.textContent = `Connect (Cost: ${Math.ceil(nodePrice)})`;
+    connectButton.textContent = `Connect (Cost: ${Math.ceil(nodePrice)})`;
     influenceDiv.textContent = `Influence: ${influence}`;
 });
 
