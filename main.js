@@ -238,6 +238,7 @@ let nodes = []; // [{ index, position, name, text, baseScale, isNexus }]
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
 
+// Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -248,6 +249,11 @@ controls.movementSpeed = 10;
 controls.rollSpeed = Math.PI / 4;
 controls.autoForward = false;
 controls.dragToLook = true;
+
+// Audio
+const listener = new THREE.AudioListener();
+camera.add(listener);
+const sound = new THREE.Audio(listener);
 
 // Font / text
 let font;
@@ -468,6 +474,16 @@ function genInfluence() {
     influenceDiv.textContent = `Influence: ${influence}`;
     pulsing = true;
     pulsingTime = 0;
+
+    if (!sound.isPlaying) {
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('music.wav', function (audio) {
+            sound.setBuffer(audio);
+            sound.setLoop(true);
+            sound.setVolume(0.5);
+            sound.play();
+        });
+    }
 }
 
 renderer.domElement.addEventListener('click', () => genInfluence());

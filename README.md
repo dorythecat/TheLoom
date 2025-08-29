@@ -11,3 +11,10 @@ A game about weaving strange looms...
 You can also click drag to move the camera.
 
 Click on the screen or press the spacer to generate influence.
+
+# Credits
+The music that accompanies the game is a self-made remix of "The
+Phantom of the Opera", from the eponymous musical by Andrew Lloyd Webber.
+
+No rights are claimed on the original work, which is owned by the respective
+copyright holders.
